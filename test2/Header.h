@@ -38,39 +38,9 @@ class scrollWND : public wxScrolledWindow
 public:
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
-	//struct HK {
-	//	wxCheckBox* CheckBox;
-	//
-	//	struct c {
-	//		wxComboBox* key; // keyboard key
-	//		wxComboBox* mod; // ctrl / alt / none
-	//		wxComboBox* exe; // path to executible
-	//		wxComboBox* vis; // will the window be visible
-	//		wxComboBox* arg; // path to the file to be executed, with args.
-	//	} C;
-	//
-	//	wxButton* folderBTN;
-	//	wxButton* delBTN;
-	//
-	//	int id;
-	//	int index;
-	//};
-	//std::vector<HK> HKs;
-
 public:
 	scrollWND(wxWindow* parent, wxWindowID id);
 	void newHK();
-	void poop(wxCommandEvent& event);
-
-	void OnCheckBox(wxCommandEvent& event);
-	void OnKey(wxCommandEvent& event);
-	void OnMod(wxCommandEvent& event);
-	void OnExe(wxCommandEvent& event);
-	void OnVis(wxCommandEvent& event);
-	void OnArg(wxCommandEvent& event);
-	void OnFolderBTN(wxCommandEvent& event);
-	void OnDelBTN(wxCommandEvent& event);
-
 };
 
 

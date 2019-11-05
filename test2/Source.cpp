@@ -13,6 +13,7 @@ bool MyApp::OnInit()
 }
 
 
+
 HK::HK(wxWindow* parent, wxWindowID id) : wxWindow(parent, id)
 {
 	CheckBox = new wxCheckBox(this, ID_nextHK, "");
@@ -49,17 +50,21 @@ HK::HK(wxWindow* parent, wxWindowID id) : wxWindow(parent, id)
 		vbox->Add(delBTN, 0, wxALL, 2);
 	}
 
+	// bind events
+	{
+		Bind(wxEVT_CHECKBOX, &HK::OnCheckBox, this, ID_nextHK);
+		Bind(wxEVT_TEXT, &HK::OnCheckBox, this, ID_nextHK + 1);
+		Bind(wxEVT_TEXT, &HK::OnCheckBox, this, ID_nextHK + 2);
+		Bind(wxEVT_TEXT, &HK::OnCheckBox, this, ID_nextHK + 3);
+		Bind(wxEVT_TEXT, &HK::OnCheckBox, this, ID_nextHK + 4);
+		Bind(wxEVT_TEXT, &HK::OnCheckBox, this, ID_nextHK + 5);
+		Bind(wxEVT_BUTTON, &HK::OnCheckBox, this, ID_nextHK + 6);
+		Bind(wxEVT_BUTTON, &HK::OnCheckBox, this, ID_nextHK + 7);
+	}
+
 	this->SetSizer(vbox);
 	this->FitInside();
 
-	Bind(wxEVT_CHECKBOX, &HK::OnCheckBox, this, ID_nextHK);
-	Bind(wxEVT_TEXT, &HK::OnCheckBox, this, ID_nextHK + 1);
-	Bind(wxEVT_TEXT, &HK::OnCheckBox, this, ID_nextHK + 2);
-	Bind(wxEVT_TEXT, &HK::OnCheckBox, this, ID_nextHK + 3);
-	Bind(wxEVT_TEXT, &HK::OnCheckBox, this, ID_nextHK + 4);
-	Bind(wxEVT_TEXT, &HK::OnCheckBox, this, ID_nextHK + 5);
-	Bind(wxEVT_BUTTON, &HK::OnCheckBox, this, ID_nextHK + 6);
-	Bind(wxEVT_BUTTON, &HK::OnCheckBox, this, ID_nextHK + 7);
 	ID_nextHK += 8;
 }
 void HK::OnCheckBox(wxCommandEvent& event)
@@ -67,7 +72,6 @@ void HK::OnCheckBox(wxCommandEvent& event)
 	wxMessageBox("HK::OnCheckBox()");
 	this->C.arg->Enable(false);
 }
-
 void HK::OnKey(wxCommandEvent& event)
 {
 }
@@ -95,59 +99,17 @@ void HK::OnDelBTN(wxCommandEvent& event)
 scrollWND::scrollWND(wxWindow* parent, wxWindowID id)
 	: wxScrolledWindow(parent, id) 
 {}
-void scrollWND::poop(wxCommandEvent& event)
-{
-	wxMessageBox(std::to_string(event.GetId()));
-}
 void scrollWND::newHK() {
 	
 	HK* h = new HK(this, wxID_ANY);
+	
+	sizer->Add(h, 0, wxEXPAND, 2);
 
-	sizer->Add(h->vbox, 0, wxEXPAND, 2);
 	this->SetSizer(sizer);
 	this->FitInside();
 	this->SetScrollRate(10, 10);
-
-	//Bind(wxEVT_CHECKBOX, &scrollWND::OnCheckBox, this, ID_nextHK);
-	//Bind(wxEVT_TEXT, &scrollWND::OnCheckBox, this, ID_nextHK + 1);
-	//Bind(wxEVT_TEXT, &scrollWND::OnCheckBox, this, ID_nextHK + 2);
-	//Bind(wxEVT_TEXT, &scrollWND::OnCheckBox, this, ID_nextHK + 3);
-	//Bind(wxEVT_TEXT, &scrollWND::OnCheckBox, this, ID_nextHK + 4);
-	//Bind(wxEVT_TEXT, &scrollWND::OnCheckBox, this, ID_nextHK + 5);
-	//Bind(wxEVT_BUTTON, &scrollWND::OnCheckBox, this, ID_nextHK + 6);
-	//Bind(wxEVT_BUTTON, &scrollWND::OnCheckBox, this, ID_nextHK + 7);
-	//ID_nextHK += 8;
 }
 
-
-void scrollWND::OnCheckBox(wxCommandEvent& event)
-{
-	int id = event.GetId();
-	wxMessageBox(std::to_string(id));
-	//HKs[0].C.arg->Enable(false);
-	FindWindowById(id);
-};
-void scrollWND::OnKey(wxCommandEvent& event)
-{
-};
-void scrollWND::OnMod(wxCommandEvent& event)
-{
-};
-void scrollWND::OnExe(wxCommandEvent& event)
-{
-};
-void scrollWND::OnVis(wxCommandEvent& event)
-{
-};
-void scrollWND::OnArg(wxCommandEvent& event)
-{
-};
-void scrollWND::OnFolderBTN(wxCommandEvent& event)
-{
-};
-void scrollWND::OnDelBTN(wxCommandEvent& event)
-{
-};
 
 
 
