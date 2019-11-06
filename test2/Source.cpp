@@ -69,8 +69,22 @@ HK::HK(wxWindow* parent, wxWindowID id) : wxWindow(parent, id)
 }
 void HK::OnCheckBox(wxCommandEvent& event)
 {
-	wxMessageBox("HK::OnCheckBox()");
-	this->C.arg->Enable(false);
+	if (this->CheckBox->GetValue() == true) {
+		this->C.key->Enable(true);
+		this->C.mod->Enable(true);
+		this->C.exe->Enable(true);
+		this->C.vis->Enable(true);
+		this->C.arg->Enable(true);
+		this->folderBTN->Enable(true);
+	}
+	else {
+		this->C.key->Enable(false);
+		this->C.mod->Enable(false);
+		this->C.exe->Enable(false);
+		this->C.vis->Enable(false);
+		this->C.arg->Enable(false);
+		this->folderBTN->Enable(false);
+	}
 }
 void HK::OnKey(wxCommandEvent& event)
 {
