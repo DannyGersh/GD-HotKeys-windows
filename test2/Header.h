@@ -8,7 +8,7 @@
 int ID_nextHK = 100;
 
 class HK : public wxWindow {
-private:
+public:
 	wxCheckBox* CheckBox;
 	struct c {
 		wxComboBox* key; // keyboard key
@@ -21,6 +21,7 @@ private:
 	wxButton* delBTN;
 public:
 	wxBoxSizer* vbox = new wxBoxSizer(wxHORIZONTAL);
+	wxString key;
 public:
 	HK(wxWindow* parent, wxWindowID id);
 	void OnCheckBox(wxCommandEvent& event);
@@ -31,6 +32,8 @@ public:
 	void OnArg(wxCommandEvent& event);
 	void OnFolderBTN(wxCommandEvent& event);
 	void OnDelBTN(wxCommandEvent& event);
+
+	void test(wxKeyEvent& event);
 };
 
 class scrollWND : public wxScrolledWindow
@@ -41,6 +44,7 @@ public:
 public:
 	scrollWND(wxWindow* parent, wxWindowID id);
 	void newHK();
+	void getHKs();
 };
 
 
@@ -49,13 +53,22 @@ class MyApp : public wxApp
 {
 public:
 	virtual bool OnInit();
+
+	//void poop() {
+	//	wxMessageBox("POOP");
+	//}
+
 };
 
 class MyFrame : public wxFrame
 {
 public:
+	wxMenu* menuFile;
+	wxMenu* menuHelp;
+	wxMenuBar* menuBar;
+
 	scrollWND* scrollwnd;
-	wxBoxSizer* sizer;
+	wxBoxSizer* MAINsizer;
 
 public:
 	MyFrame();
@@ -75,9 +88,9 @@ private:
 
 enum
 {
-	ID_Hello = 1,
-	ID_newHKbtn = 2,
-	ID_test = 12345
+	ID_Hello = 12345,
+	ID_newHKbtn = wxID_ANY,
+	ID_test = 1239
 };
 
 wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
@@ -85,6 +98,9 @@ EVT_MENU(ID_Hello, MyFrame::OnHello)
 EVT_MENU(wxID_EXIT, MyFrame::OnExit)
 EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
 EVT_BUTTON(ID_newHKbtn, MyFrame::newHK)
+
+//EVT_HOTKEY(ID_test, MyFrame::OnHello)
+
 wxEND_EVENT_TABLE()
 
 
