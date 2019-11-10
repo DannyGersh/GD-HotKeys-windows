@@ -11,8 +11,6 @@ if (!RegisterHotKey(12345, 0, 'Q'))
 Bind(wxEVT_HOTKEY, &HK::test, this, 12345);
 */
 
-wxIMPLEMENT_APP(MyApp);
-
 bool MyApp::OnInit()
 {
 	MyFrame *frame = new MyFrame();
@@ -47,6 +45,24 @@ HK::HK(wxWindow* parent, wxWindowID id) : wxWindow(parent, id)
 	 
 	// comboboxes
 	{
+		// key
+		{
+			for (int i = 1; i <= 12; i++) {
+				C.key->Append("F" + std::to_string(i));
+			}
+		}
+		// mod
+		{
+			wxString strList[4]{ "CTRL", "ALT", "WIN", "NONE" };
+			wxArrayString a(4, strList);
+			C.mod->Append(a);
+		}
+		// vis
+		{
+			C.vis->Append("True");
+			C.vis->Append("False");
+		}
+
 		vbox->Add(C.key, 0, wxCENTER | wxALL, 2);
 		vbox->Add(C.mod, 0, wxCENTER | wxALL, 2);
 		vbox->Add(C.exe, 0, wxCENTER | wxALL, 2);
@@ -100,20 +116,73 @@ void HK::OnCheckBox(wxCommandEvent& event)
 }
 void HK::OnKey(wxCommandEvent& event)
 {
-	wxString val{ C.key->GetValue() };
-	if (val == "") {
-		C.key->SetValue(key);
-	}
-	else {
-		wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + key);
-		wxString oldVal; rk.QueryValue("key", oldVal);
-		key = val;
-		if (oldVal != key) 
-		{
-			rk.Rename(key);
-			rk.SetValue("key", val);
+	
+	wxString newVal{ C.key->GetValue() }; // oldVal == key ... at the moment
+	wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + key);
+	wxString oldVal; rk.QueryValue("key", oldVal);
+
+	bool proceed{ true };
+	if (newVal == "" || newVal.length() > 1) {
+		proceed = false;
+		for (auto i : C.key->GetStrings()) {
+			if (i == newVal) {
+				proceed = true;
+			}
 		}
 	}
+	for (auto i : STRkeys) {
+		if (i == newVal) {
+			proceed = false;
+		}
+	}
+
+	if (proceed) 
+	{
+		// replace STRkeys old key
+		{
+			std::vector<wxString>::iterator itr = std::find(STRkeys.begin(), STRkeys.end(), oldVal);
+			if (itr != STRkeys.cend()) {
+				int index = std::distance(STRkeys.begin(), itr);
+				STRkeys[index] = newVal;
+			}
+		}
+
+		// update HK::key and registry
+		{
+			if (newVal != oldVal) 
+			{
+				key = newVal; // HK::key
+				rk.Rename(newVal);
+				rk.SetValue("key", newVal);
+			}
+		}
+
+	}
+	else // proceed
+	{ 
+		if (newVal.length() > 1) {
+			if(isin(C.key->GetStrings(), newVal))
+			{
+				// bug - C.key->SetValue(key) does not work
+				wxMessageBox("Key not unique");
+				C.key->SetValue(key);
+			}
+			else
+			{
+				wxMessageBox("Onley one charekter allowd");
+				C.key->SetValue(key);
+			}
+		}
+		else if (newVal == "") {
+			wxMessageBox("Hotkey must have a key");
+			C.key->SetValue(key);
+		}
+		else if (newVal != key) {
+			wxMessageBox("Key not unique");
+			C.key->SetValue(key);
+		}
+	}
+
 }
 void HK::OnMod(wxCommandEvent& event)
 {
@@ -148,12 +217,24 @@ void scrollWND::newHK() {
 
 	// main
 	{
-		HK* h = new HK(this, wxID_ANY);
-		
-		sizer->Add(h, 0, wxEXPAND, 2);
-		this->SetSizer(sizer);
-		this->FitInside();
-		this->SetScrollRate(10, 10);
+		bool proceed{ true };
+		for (auto i : STRkeys) {
+			if (i == "key") {
+				proceed = false;
+				break;
+			}
+		}
+		if (proceed) {
+			HK* h = new HK(this, wxID_ANY);
+			h->SetLabel("key");
+			STRkeys.push_back("key");
+			h->key = "key";
+
+			sizer->Add(h, 0, wxEXPAND, 2);
+			this->SetSizer(sizer);
+			this->FitInside();
+			this->SetScrollRate(10, 10);
+		}
 	}
 
 	// registry
@@ -206,7 +287,9 @@ void scrollWND::getHKs() {
 		h->C.vis->SetValue(vis);
 		h->C.arg->SetValue(arg);
 
-		k0.GetNextKey(key_name, why);
+		STRkeys.push_back(key); 
+
+		Kmain.GetNextKey(key_name, why);
 	}
 }
 
@@ -295,3 +378,6 @@ void MyFrame::newHK(wxCommandEvent& event)
 }
 
 
+
+
+wxIMPLEMENT_APP(MyApp);

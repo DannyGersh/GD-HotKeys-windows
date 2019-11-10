@@ -6,6 +6,17 @@
 
 
 int ID_nextHK = 100;
+std::vector<wxString> STRkeys; // this is for cheking if a new key is unique.
+
+bool isin(wxArrayString array, wxString str) 
+{	
+	for (auto& i : array) {
+		if (i == str) {
+			return true;
+		}
+	}
+	return false;
+}
 
 class HK : public wxWindow {
 public:
