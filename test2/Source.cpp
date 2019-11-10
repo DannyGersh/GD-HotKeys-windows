@@ -23,6 +23,9 @@ bool MyApp::OnInit()
 
 HK::HK(wxWindow* parent, wxWindowID id) : wxWindow(parent, id)
 {	
+	RegisterHotKey(12345, mods.ctrl.vk, 0x70);
+	Bind(wxEVT_HOTKEY, &HK::test, this, 12345);
+
 	// init controls
 	{
 		CheckBox = new wxCheckBox(this, ID_nextHK, "");
@@ -53,9 +56,8 @@ HK::HK(wxWindow* parent, wxWindowID id) : wxWindow(parent, id)
 		}
 		// mod
 		{
-			wxString strList[4]{ "CTRL", "ALT", "WIN", "NONE" };
-			wxArrayString a(4, strList);
-			C.mod->Append(a);
+			wxString strList[5]{ "CTRL", "ALT", "WIN", "SHIFT", "NONE" };
+			C.mod->Append(wxArrayString(5, strList));
 		}
 		// vis
 		{
@@ -97,96 +99,123 @@ HK::HK(wxWindow* parent, wxWindowID id) : wxWindow(parent, id)
 }
 void HK::OnCheckBox(wxCommandEvent& event)
 {
+	wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + key);
+
 	if (this->CheckBox->GetValue() == true) {
-		this->C.key->Enable(true);
-		this->C.mod->Enable(true);
-		this->C.exe->Enable(true);
-		this->C.vis->Enable(true);
-		this->C.arg->Enable(true);
-		this->folderBTN->Enable(true);
+		C.key->Enable(true);
+		C.mod->Enable(true);
+		C.exe->Enable(true);
+		C.vis->Enable(true);
+		C.arg->Enable(true);
+		folderBTN->Enable(true);
+		rk.SetValue("checkbox", 1);
 	}
 	else {
-		this->C.key->Enable(false);
-		this->C.mod->Enable(false);
-		this->C.exe->Enable(false);
-		this->C.vis->Enable(false);
-		this->C.arg->Enable(false);
-		this->folderBTN->Enable(false);
+		C.key->Enable(false);
+		C.mod->Enable(false);
+		C.exe->Enable(false);
+		C.vis->Enable(false);
+		C.arg->Enable(false);
+		folderBTN->Enable(false);
+		rk.SetValue("checkbox", 0);
 	}
 }
 void HK::OnKey(wxCommandEvent& event)
 {
-	
-	wxString newVal{ C.key->GetValue() }; // oldVal == key ... at the moment
-	wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + key);
-	wxString oldVal; rk.QueryValue("key", oldVal);
-
-	bool proceed{ true };
-	if (newVal == "" || newVal.length() > 1) {
-		proceed = false;
-		for (auto i : C.key->GetStrings()) {
-			if (i == newVal) {
-				proceed = true;
-			}
-		}
-	}
-	for (auto i : STRkeys) {
-		if (i == newVal) {
-			proceed = false;
-		}
-	}
-
-	if (proceed) 
+	if (finSetup && processTextCtrl)
 	{
-		// replace STRkeys old key
+		processTextCtrl = false;
+
+		wxString newVal{ C.key->GetValue() };
+		wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + key);
+		wxString oldVal; rk.QueryValue("key", oldVal); // oldVal == key ... at the moment
+		wxArrayString Fs = C.key->GetStrings();
+
+		int scenario{ 0 };
+		if (isin(Fs, newVal) && oldVal != newVal)
 		{
-			std::vector<wxString>::iterator itr = std::find(STRkeys.begin(), STRkeys.end(), oldVal);
-			if (itr != STRkeys.cend()) {
-				int index = std::distance(STRkeys.begin(), itr);
-				STRkeys[index] = newVal;
-			}
+			if (isin(STRkeys, newVal)) { scenario = 1; } 
+			else { scenario = 2; } 
+		}
+		else if(oldVal != newVal)
+		{
+			if (isin(STRkeys, newVal)) { scenario = 3; } 
+		}
+		else if (newVal == "")
+		{
+			scenario = 5;
 		}
 
-		// update HK::key and registry
+		/*
+		scenarios:
+		0. key is inique
+		1. newVal is NOT unique and its F1, F2 ...
+		2. newVal is unique and its F1, F2 ...
+		3. newVal is NOT unique and its NOT F1, F2 ...
+		4. newVal is unique and its NOT F1, F2 ...
+		5. newVal is empty ""
+		*/
+
+		switch (scenario)
 		{
-			if (newVal != oldVal) 
+
+		case 0: 
+		{
+			// replace STRkeys old key
+			{
+				std::vector<wxString>::iterator itr = std::find(STRkeys.begin(), STRkeys.end(), oldVal);
+				if (itr != STRkeys.cend()) {
+					int index = std::distance(STRkeys.begin(), itr);
+					STRkeys[index] = newVal;
+				}
+			}
+
+			// update HK::key and registry
+			{
+				if (newVal != oldVal)
+				{
+					key = newVal; // HK::key
+					rk.Rename(newVal);
+					rk.SetValue("key", newVal);
+				}
+			}
+
+			break;
+		}
+		case 1:
+		{
+			wxMessageBox("Key not unique:" + wxString(" ") + newVal);
+			C.key->SetValue(oldVal);
+			break;
+		}
+		case 2:
+		{
+			if (newVal != oldVal)
 			{
 				key = newVal; // HK::key
 				rk.Rename(newVal);
 				rk.SetValue("key", newVal);
 			}
+			break;
+		}
+		case 3:
+		{
+			wxMessageBox("Key not unique:" + wxString(" ") + newVal);
+			C.key->SetValue(oldVal);
+			break;
 		}
 
-	}
-	else // proceed
-	{ 
-		if (newVal.length() > 1) {
-			if(isin(C.key->GetStrings(), newVal))
-			{
-				// bug - C.key->SetValue(key) does not work
-				wxMessageBox("Key not unique");
-				C.key->SetValue(key);
-			}
-			else
-			{
-				wxMessageBox("Onley one charekter allowd");
-				C.key->SetValue(key);
-			}
-		}
-		else if (newVal == "") {
-			wxMessageBox("Hotkey must have a key");
-			C.key->SetValue(key);
-		}
-		else if (newVal != key) {
-			wxMessageBox("Key not unique");
-			C.key->SetValue(key);
 		}
 	}
-
-}
+	if (!processTextCtrl)
+	{
+		processTextCtrl = true;
+	}
+} 
 void HK::OnMod(wxCommandEvent& event)
 {
-
+	wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + key);
+	rk.SetValue("mod", C.mod->GetValue());
 }
 void HK::OnExe(wxCommandEvent& event)
 {
@@ -215,16 +244,10 @@ scrollWND::scrollWND(wxWindow* parent, wxWindowID id)
 {}
 void scrollWND::newHK() {
 
-	// main
+	if (!isin(STRkeys, "key"))
 	{
-		bool proceed{ true };
-		for (auto i : STRkeys) {
-			if (i == "key") {
-				proceed = false;
-				break;
-			}
-		}
-		if (proceed) {
+		// main
+		{
 			HK* h = new HK(this, wxID_ANY);
 			h->SetLabel("key");
 			STRkeys.push_back("key");
@@ -235,21 +258,21 @@ void scrollWND::newHK() {
 			this->FitInside();
 			this->SetScrollRate(10, 10);
 		}
-	}
 
-	// registry
-	{
-		wxRegKey k(wxRegKey::HKCU, "Software\\wxHKs\\key");
-		if (k.Create(false)) {
-			k.SetValue("checkbox", 1);
-			k.SetValue("key", "key");
-			k.SetValue("mod", "mod");
-			k.SetValue("exe", "exe path");
-			k.SetValue("vis", "is visible");
-			k.SetValue("arg", "file path");
+		// registry
+		{
+			wxRegKey k(wxRegKey::HKCU, "Software\\wxHKs\\key");
+			if (k.Create(false)) {
+				k.SetValue("checkbox", 1);
+				k.SetValue("key", "key");
+				k.SetValue("mod", "mod");
+				k.SetValue("exe", "exe path");
+				k.SetValue("vis", "is visible");
+				k.SetValue("arg", "file path");
+			}
 		}
-	}
 
+	}
 }
 void scrollWND::getHKs() {
 	
@@ -271,21 +294,48 @@ void scrollWND::getHKs() {
 		this->FitInside();
 		
 		long checkbox; wxString key, mod, exe, vis, arg;
-		wxRegKey k0(wxRegKey::HKCU, "Software\\wxHKs\\" + key_name);
-		
-		k0.QueryValue("checkbox", &checkbox);
-		k0.QueryValue("key", key); h->key = key;
-		k0.QueryValue("mod", mod); 
-		k0.QueryValue("exe", exe);
-		k0.QueryValue("vis", vis);
-		k0.QueryValue("arg", arg);
 
-		h->CheckBox->SetValue(checkbox);
-		h->C.key->SetValue(key);
-		h->C.mod->SetValue(mod);
-		h->C.exe->SetValue(exe);
-		h->C.vis->SetValue(vis);
-		h->C.arg->SetValue(arg);
+		// registry
+		{
+			wxRegKey k0(wxRegKey::HKCU, "Software\\wxHKs\\" + key_name);
+
+			k0.QueryValue("checkbox", &checkbox);
+			k0.QueryValue("key", key); h->key = key;
+			k0.QueryValue("mod", mod);
+			k0.QueryValue("exe", exe);
+			k0.QueryValue("vis", vis);
+			k0.QueryValue("arg", arg);
+		}
+
+		// set control values
+		{
+			h->CheckBox->SetValue(checkbox);
+			h->C.key->SetValue(key);
+			h->C.mod->SetValue(mod);
+			h->C.exe->SetValue(exe);
+			h->C.vis->SetValue(vis);
+			h->C.arg->SetValue(arg);
+		}
+
+		// checkbox
+		{
+			if (checkbox == true) {
+				h->C.key->Enable(true);
+				h->C.mod->Enable(true);
+				h->C.exe->Enable(true);
+				h->C.vis->Enable(true);
+				h->C.arg->Enable(true);
+				h->folderBTN->Enable(true);
+			}
+			else {
+				h->C.key->Enable(false);
+				h->C.mod->Enable(false);
+				h->C.exe->Enable(false);
+				h->C.vis->Enable(false);
+				h->C.arg->Enable(false);
+				h->folderBTN->Enable(false);
+			}
+		}
 
 		STRkeys.push_back(key); 
 
@@ -358,6 +408,8 @@ MyFrame::MyFrame()
 
 	this->SetSizer(MAINsizer);
 	this->Show();
+
+	finSetup = true;
 }
 void MyFrame::OnExit(wxCommandEvent& event)
 {
