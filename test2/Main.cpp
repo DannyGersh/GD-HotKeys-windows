@@ -11,9 +11,9 @@ if (!RegisterHotKey(12345, 0, 'Q'))
 Bind(wxEVT_HOTKEY, &HK::test, this, 12345);
 */
 
-bool MyApp::OnInit()
+bool MainApp::OnInit()
 {
-	MyFrame *frame = new MyFrame();
+	MainFrame *frame = new MainFrame();
 	frame->SetSize(800, 800);
 	frame->Show(true);
 
@@ -228,17 +228,16 @@ void HK::test(wxKeyEvent& event) {
 
 
 
-scrollWND::scrollWND(wxWindow* parent, wxWindowID id)
+MainScrollWND::MainScrollWND(wxWindow* parent, wxWindowID id)
 	: wxScrolledWindow(parent, id) 
 {}
-void scrollWND::newHK() {
+void MainScrollWND::newHK() {
 
 	if (!isin(STRkeys, "key"))
 	{
 		// main
 		{
 			HK* h = new HK(this, wxID_ANY);
-			h->SetLabel("key");
 			STRkeys.push_back("key");
 			h->key = "key";
 
@@ -263,7 +262,7 @@ void scrollWND::newHK() {
 
 	}
 }
-void scrollWND::getHKs() {
+void MainScrollWND::getHKs() {
 	
 	wxRegKey Kmain(wxRegKey::HKCU, "Software\\wxHKs");
 	Kmain.Open();
@@ -334,9 +333,7 @@ void scrollWND::getHKs() {
 
 
 
-
-
-MyFrame::MyFrame()
+MainFrame::MainFrame()
 	: wxFrame(NULL, wxID_ANY, "Hello World")
 {
 	// menue
@@ -356,17 +353,17 @@ MyFrame::MyFrame()
 		SetMenuBar(menuBar);
 		CreateStatusBar();
 		SetStatusText("Welcome to wxWidgets!");
-		Bind(wxEVT_MENU, &MyFrame::OnHello, this, ID_Hello);
-		Bind(wxEVT_MENU, &MyFrame::OnAbout, this, wxID_ABOUT);
-		Bind(wxEVT_MENU, &MyFrame::OnExit, this, wxID_EXIT);
+		Bind(wxEVT_MENU, &MainFrame::OnHello, this, ID_Hello);
+		Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
+		Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
 	}
 
 	// main sizer
 	{
-		scrollwnd = new scrollWND(this, wxID_ANY);
+		MainScroll = new MainScrollWND(this, wxID_ANY);
 		MAINsizer = new wxBoxSizer(wxVERTICAL);
 
-		MAINsizer->Add(scrollwnd, 1, wxEXPAND);
+		MAINsizer->Add(MainScroll, 1, wxEXPAND);
 
 		wxBoxSizer* hbox = new wxBoxSizer(wxHORIZONTAL);
 		hbox->Add(
@@ -374,7 +371,7 @@ MyFrame::MyFrame()
 			1, wxALL, 10
 		);
 		hbox->Add(
-			new wxButton(this, ID_newHKbtn, "View EXEs"),
+			new wxButton(this, ID_viewEXEs, "View EXEs"),
 			1, wxALL, 10
 		);
 
@@ -388,10 +385,11 @@ MyFrame::MyFrame()
 		if (Kmain.Create(false)) 
 		{
 			wxMessageBox("Software\\wxHKs regKEY created");
-			this->scrollwnd->newHK();
+			Kmain.SetValue("Paint", "C:\\Windows\\System32\\mspaint.exe");
+			this->MainScroll->newHK();
 		}
 		else {
-			this->scrollwnd->getHKs();
+			this->MainScroll->getHKs();
 		}
 	}
 
@@ -400,30 +398,32 @@ MyFrame::MyFrame()
 
 	finSetup = true;
 }
-void MyFrame::OnExit(wxCommandEvent& event)
+void MainFrame::OnExit(wxCommandEvent& event)
 {
 	Close(true);
 }
-void MyFrame::OnAbout(wxCommandEvent& event)
+void MainFrame::OnAbout(wxCommandEvent& event)
 {
 	wxMessageBox("This is a wxWidgets Hello World example",
 		"About Hello World", wxOK | wxICON_INFORMATION);
 }
-void MyFrame::OnHello(wxCommandEvent& event)
+void MainFrame::OnHello(wxCommandEvent& event)
 {
 	wxLogMessage("Hello world from wxWidgets!");
 }
 
-void MyFrame::newHK(wxCommandEvent& event)
+void MainFrame::newHK(wxCommandEvent& event)
 {
-	this->scrollwnd->newHK();
+	this->MainScroll->newHK();
 }
 
-void MyFrame::viewEXEs(wxCommandEvent& event) {
-
+void MainFrame::viewEXEs(wxCommandEvent& event) 
+{
+	EXEsFrame * exe = new EXEsFrame();
+	exe->Show();
 }
 
 
 
 
-wxIMPLEMENT_APP(MyApp);
+wxIMPLEMENT_APP(MainApp);

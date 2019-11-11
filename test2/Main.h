@@ -2,6 +2,8 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif
+
+#include "ViewEXEs.h"
 #include <vector>
 
 
@@ -49,6 +51,7 @@ struct MODS {
 } mods;
 
 
+
 class HK : public wxWindow {
 public:
 	wxCheckBox* CheckBox;
@@ -78,20 +81,20 @@ public:
 	void test(wxKeyEvent& event);
 };
 
-class scrollWND : public wxScrolledWindow
+class MainScrollWND : public wxScrolledWindow
 {
 public:
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
 public:
-	scrollWND(wxWindow* parent, wxWindowID id);
+	MainScrollWND(wxWindow* parent, wxWindowID id);
 	void newHK();
 	void getHKs();
 };
 
 
 
-class MyApp : public wxApp
+class MainApp : public wxApp
 {
 public:
 	virtual bool OnInit();
@@ -102,23 +105,24 @@ public:
 
 };
 
-class MyFrame : public wxFrame
+class MainFrame : public wxFrame
 {
 public:
 	wxMenu* menuFile;
 	wxMenu* menuHelp;
 	wxMenuBar* menuBar;
 
-	scrollWND* scrollwnd;
+	MainScrollWND* MainScroll;
 	wxBoxSizer* MAINsizer;
 
 public:
-	MyFrame();
+	MainFrame();
+
 private:
 	void OnHello(wxCommandEvent& event);
 	void OnExit(wxCommandEvent& event);
 	void OnAbout(wxCommandEvent& event);
-	
+
 	void newHK(wxCommandEvent& event);
 	void viewEXEs(wxCommandEvent& event);
 
@@ -131,19 +135,20 @@ private:
 
 enum
 {
-	ID_Hello = 12345,
-	ID_newHKbtn = wxID_ANY,
-	ID_viewEXEs,
-	ID_test = 1239
+	ID_Hello = 100,
+	ID_newHKbtn = 101,
+	ID_viewEXEs = 102,
+	ID_test = 103
 };
 
-wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
+wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 
-EVT_MENU(ID_Hello, MyFrame::OnHello)
-EVT_MENU(wxID_EXIT, MyFrame::OnExit)
-EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
-EVT_BUTTON(ID_newHKbtn, MyFrame::newHK)
-EVT_BUTTON(ID_viewEXEs, MyFrame::viewEXEs)
+EVT_MENU(ID_Hello, MainFrame::OnHello)
+EVT_MENU(wxID_EXIT, MainFrame::OnExit)
+EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
+
+EVT_BUTTON(ID_newHKbtn, MainFrame::newHK)
+EVT_BUTTON(ID_viewEXEs, MainFrame::viewEXEs)
 
 wxEND_EVENT_TABLE()
 
