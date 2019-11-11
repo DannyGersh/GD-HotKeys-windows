@@ -1,6 +1,6 @@
 #include "wx/wxprec.h"
 #include <wx/msw/registry.h>
-#include "Header.h"
+#include "Main.h"
 
 
 /*
@@ -30,10 +30,10 @@ HK::HK(wxWindow* parent, wxWindowID id) : wxWindow(parent, id)
 	{
 		CheckBox = new wxCheckBox(this, ID_nextHK, "");
 		C = {
+			new wxComboBox(this, ID_nextHK + 2, "mod", wxDefaultPosition, wxDefaultSize, 0, 0, wxCB_READONLY),
 			new wxComboBox(this, ID_nextHK + 1, "key"),
-			new wxComboBox(this, ID_nextHK + 2, "mod"),
-			new wxComboBox(this, ID_nextHK + 3, "exe path"),
-			new wxComboBox(this, ID_nextHK + 4, "is visible"),
+			new wxComboBox(this, ID_nextHK + 3, "exe path", wxDefaultPosition, wxDefaultSize, 0, 0, wxCB_READONLY),
+			new wxComboBox(this, ID_nextHK + 4, "is visible", wxDefaultPosition, wxDefaultSize, 0, 0, wxCB_READONLY),
 			new wxComboBox(this, ID_nextHK + 5, "file path"),
 		};
 		folderBTN = new wxButton(this, ID_nextHK + 6, "6");
@@ -48,25 +48,27 @@ HK::HK(wxWindow* parent, wxWindowID id) : wxWindow(parent, id)
 	 
 	// comboboxes
 	{
+		// mod
+		{
+			wxString strList[5]{ "CTRL", "ALT", "WIN", "SHIFT", "NONE" };
+			C.mod->Append(wxArrayString(5, strList));
+			C.mod->SetSelection(0);
+		}
 		// key
 		{
 			for (int i = 1; i <= 12; i++) {
 				C.key->Append("F" + std::to_string(i));
 			}
 		}
-		// mod
-		{
-			wxString strList[5]{ "CTRL", "ALT", "WIN", "SHIFT", "NONE" };
-			C.mod->Append(wxArrayString(5, strList));
-		}
 		// vis
 		{
 			C.vis->Append("True");
 			C.vis->Append("False");
+			C.vis->SetSelection(0);
 		}
 
-		vbox->Add(C.key, 0, wxCENTER | wxALL, 2);
 		vbox->Add(C.mod, 0, wxCENTER | wxALL, 2);
+		vbox->Add(C.key, 0, wxCENTER | wxALL, 2);
 		vbox->Add(C.exe, 0, wxCENTER | wxALL, 2);
 		vbox->Add(C.vis, 0, wxCENTER | wxALL, 2);
 		vbox->Add(C.arg, 1, wxCENTER | wxALL, 2);
@@ -132,54 +134,40 @@ void HK::OnKey(wxCommandEvent& event)
 		wxArrayString Fs = C.key->GetStrings();
 
 		int scenario{ 0 };
+
 		if (isin(Fs, newVal) && oldVal != newVal)
 		{
 			if (isin(STRkeys, newVal)) { scenario = 1; } 
-			else { scenario = 2; } 
 		}
 		else if(oldVal != newVal)
 		{
-			if (isin(STRkeys, newVal)) { scenario = 3; } 
+			if (isin(STRkeys, newVal)) { scenario = 2; } 
 		}
-		else if (newVal == "")
+		if (newVal == "")
 		{
-			scenario = 5;
+			scenario = 3;
 		}
 
 		/*
 		scenarios:
-		0. key is inique
+		0. key is unique
 		1. newVal is NOT unique and its F1, F2 ...
-		2. newVal is unique and its F1, F2 ...
-		3. newVal is NOT unique and its NOT F1, F2 ...
-		4. newVal is unique and its NOT F1, F2 ...
-		5. newVal is empty ""
+		2. newVal is NOT unique and its NOT F1, F2 ...
+		3. newVal is empty ""
 		*/
-
+		
 		switch (scenario)
 		{
 
 		case 0: 
 		{
-			// replace STRkeys old key
+			if (newVal != oldVal)
 			{
-				std::vector<wxString>::iterator itr = std::find(STRkeys.begin(), STRkeys.end(), oldVal);
-				if (itr != STRkeys.cend()) {
-					int index = std::distance(STRkeys.begin(), itr);
-					STRkeys[index] = newVal;
-				}
+				replaceSTRinVEC(STRkeys, oldVal, newVal);
+				key = newVal; // HK::key
+				rk.Rename(newVal);
+				rk.SetValue("key", newVal);
 			}
-
-			// update HK::key and registry
-			{
-				if (newVal != oldVal)
-				{
-					key = newVal; // HK::key
-					rk.Rename(newVal);
-					rk.SetValue("key", newVal);
-				}
-			}
-
 			break;
 		}
 		case 1:
@@ -190,17 +178,12 @@ void HK::OnKey(wxCommandEvent& event)
 		}
 		case 2:
 		{
-			if (newVal != oldVal)
-			{
-				key = newVal; // HK::key
-				rk.Rename(newVal);
-				rk.SetValue("key", newVal);
-			}
+			wxMessageBox("Key not unique:" + wxString(" ") + newVal);
+			C.key->SetValue(oldVal);
 			break;
 		}
 		case 3:
 		{
-			wxMessageBox("Key not unique:" + wxString(" ") + newVal);
 			C.key->SetValue(oldVal);
 			break;
 		}
@@ -219,12 +202,18 @@ void HK::OnMod(wxCommandEvent& event)
 }
 void HK::OnExe(wxCommandEvent& event)
 {
+	wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + key);
+	rk.SetValue("exe", C.exe->GetValue());
 }
 void HK::OnVis(wxCommandEvent& event)
 {
+	wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + key);
+	rk.SetValue("vis", C.vis->GetValue());
 }
 void HK::OnArg(wxCommandEvent& event)
 {
+	wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + key);
+	rk.SetValue("arg", C.arg->GetValue());
 }
 void HK::OnFolderBTN(wxCommandEvent& event)
 {
@@ -284,7 +273,7 @@ void scrollWND::getHKs() {
 	long why{ 1 };
 
 	Kmain.GetKeyInfo(&subkeys, NULL, NULL, NULL);
-	Kmain.GetFirstKey(key_name, why);
+	Kmain.GetFirstKey(key_name, why); 
 
 	for (size_t i = 0; i < subkeys; i++)
 	{
@@ -372,7 +361,7 @@ MyFrame::MyFrame()
 		Bind(wxEVT_MENU, &MyFrame::OnExit, this, wxID_EXIT);
 	}
 
-	// setup MAINsizer
+	// main sizer
 	{
 		scrollwnd = new scrollWND(this, wxID_ANY);
 		MAINsizer = new wxBoxSizer(wxVERTICAL);
@@ -381,11 +370,11 @@ MyFrame::MyFrame()
 
 		wxBoxSizer* hbox = new wxBoxSizer(wxHORIZONTAL);
 		hbox->Add(
-			new wxButton(this, ID_newHKbtn, "POOP"),
+			new wxButton(this, ID_newHKbtn, "New hotkey"),
 			1, wxALL, 10
 		);
 		hbox->Add(
-			new wxButton(this, ID_newHKbtn, "POOP"),
+			new wxButton(this, ID_newHKbtn, "View EXEs"),
 			1, wxALL, 10
 		);
 
@@ -424,9 +413,14 @@ void MyFrame::OnHello(wxCommandEvent& event)
 {
 	wxLogMessage("Hello world from wxWidgets!");
 }
+
 void MyFrame::newHK(wxCommandEvent& event)
 {
 	this->scrollwnd->newHK();
+}
+
+void MyFrame::viewEXEs(wxCommandEvent& event) {
+
 }
 
 
