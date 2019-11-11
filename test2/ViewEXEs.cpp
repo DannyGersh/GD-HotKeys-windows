@@ -1,5 +1,4 @@
 #include "wx/wxprec.h"
-#include <wx/msw/registry.h>
 #include "ViewEXEs.h"
 
 

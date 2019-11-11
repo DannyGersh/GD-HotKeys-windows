@@ -1,6 +1,7 @@
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
+#include <wx/msw/registry.h>
 #endif
 
 #include "ViewEXEs.h"
@@ -10,33 +11,8 @@
 int ID_nextHK = 100;
 bool finSetup{ false };
 bool processTextCtrl{ true };
-std::vector<wxString> STRkeys; // for cheking if a new key is unique.
+wxArrayString STRkeys; // for cheking if a new key is unique.
 
-bool isin(wxArrayString& array, wxString str) 
-{	
-	for (auto& i : array) {
-		if (i == str) {
-			return true;
-		}
-	}
-	return false;
-}
-bool isin(std::vector<wxString>& array, wxString str)
-{
-	for (auto& i : array) {
-		if (i == str) {
-			return true;
-		}
-	}
-	return false;
-}
-void replaceSTRinVEC(std::vector<wxString>& vec, wxString old, wxString New) {
-	std::vector<wxString>::iterator itr = std::find(vec.begin(), vec.end(), old);
-	if (itr != vec.cend()) {
-		int index = std::distance(vec.begin(), itr);
-		vec[index] = New;
-	}
-}
 
 struct MODS {
 	struct pair {

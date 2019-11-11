@@ -152,6 +152,7 @@
     <ClCompile Include="ViewEXEs.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="ViewEXEs.h" />
   </ItemGroup>

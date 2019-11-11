@@ -130,70 +130,31 @@ void HK::OnKey(wxCommandEvent& event)
 
 		wxString newVal{ C.key->GetValue() };
 		wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + key);
-		wxString oldVal; rk.QueryValue("key", oldVal); // oldVal == key ... at the moment
+		wxString oldVal; rk.QueryValue("key", oldVal); 
 		wxArrayString Fs = C.key->GetStrings();
 
-		int scenario{ 0 };
-
-		if (isin(Fs, newVal) && oldVal != newVal)
-		{
-			if (isin(STRkeys, newVal)) { scenario = 1; } 
-		}
-		else if(oldVal != newVal)
-		{
-			if (isin(STRkeys, newVal)) { scenario = 2; } 
-		}
-		if (newVal == "")
-		{
-			scenario = 3;
-		}
-
-		/*
-		scenarios:
-		0. key is unique
-		1. newVal is NOT unique and its F1, F2 ...
-		2. newVal is NOT unique and its NOT F1, F2 ...
-		3. newVal is empty ""
-		*/
-		
-		switch (scenario)
-		{
-
-		case 0: 
-		{
-			if (newVal != oldVal)
-			{
-				replaceSTRinVEC(STRkeys, oldVal, newVal);
-				key = newVal; // HK::key
-				rk.Rename(newVal);
-				rk.SetValue("key", newVal);
-			}
-			break;
-		}
-		case 1:
-		{
-			wxMessageBox("Key not unique:" + wxString(" ") + newVal);
+		if (newVal == "") {
 			C.key->SetValue(oldVal);
-			break;
 		}
-		case 2:
+		else if (STRkeys.Index(newVal) == wxNOT_FOUND)
 		{
-			wxMessageBox("Key not unique:" + wxString(" ") + newVal);
-			C.key->SetValue(oldVal);
-			break;
+			STRkeys.Remove(oldVal); STRkeys.Add(newVal);
+			key = newVal; // HK::key
+			rk.Rename(newVal);
+			rk.SetValue("key", newVal);
 		}
-		case 3:
+		else
 		{
+			wxMessageBox("key not unique");
 			C.key->SetValue(oldVal);
-			break;
 		}
 
-		}
 	}
-	if (!processTextCtrl)
+	else
 	{
 		processTextCtrl = true;
 	}
+	
 } 
 void HK::OnMod(wxCommandEvent& event)
 {
@@ -233,12 +194,12 @@ MainScrollWND::MainScrollWND(wxWindow* parent, wxWindowID id)
 {}
 void MainScrollWND::newHK() {
 
-	if (!isin(STRkeys, "key"))
+	if (STRkeys.Index("key") == wxNOT_FOUND)
 	{
 		// main
 		{
 			HK* h = new HK(this, wxID_ANY);
-			STRkeys.push_back("key");
+			STRkeys.Add("key");
 			h->key = "key";
 
 			sizer->Add(h, 0, wxEXPAND, 2);
@@ -325,7 +286,7 @@ void MainScrollWND::getHKs() {
 			}
 		}
 
-		STRkeys.push_back(key); 
+		STRkeys.Add(key); 
 
 		Kmain.GetNextKey(key_name, why);
 	}
