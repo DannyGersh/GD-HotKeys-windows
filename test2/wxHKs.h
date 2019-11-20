@@ -17,6 +17,7 @@ struct MODS {
 } mods;
 
 
+
 class HK : public wxWindow
 {
 public:
@@ -46,7 +47,7 @@ public:
 	void OnArg(wxCommandEvent& event);
 	void OnSearch(wxCommandEvent& event);
 	void OnDelete(wxCommandEvent& event);
-
+	void registerHK();
 	void test(wxKeyEvent& event);
 
 };

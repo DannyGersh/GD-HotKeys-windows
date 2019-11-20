@@ -137,8 +137,7 @@ HK::HK(wxWindow* parent, wxWindowID id, long c, wxString m, wxString k, wxString
 
 		if (c)
 		{
-			int keyCODE = VkKeyScanExA(k[0], GetKeyboardLayout(0));
-			RegisterHotKey(ID, mod, keyCODE);
+			registerHK();
 		}
 	}
 
@@ -212,9 +211,7 @@ void HK::OnKey(wxCommandEvent& event)
 			rk.Rename(newVal);
 			rk.SetValue("key", newVal);
 
-			int keyCODE = VkKeyScanExA((int)newVal[0], GetKeyboardLayout(0));			
-			UnregisterHotKey(ID);
-			RegisterHotKey(ID, mod, keyCODE);
+			registerHK();
 		}
 		else
 		{
@@ -233,9 +230,7 @@ void HK::OnMod(wxCommandEvent& event)
 	if (m == mods.none.first) { mod = mods.none.second; }
 	if (m == mods.shift.first) { mod = mods.shift.second; }
 
-	int keyCODE = VkKeyScanExA((int)key[0], GetKeyboardLayout(0));
-	UnregisterHotKey(ID);
-	RegisterHotKey(ID, mod, keyCODE);
+	registerHK();
 }
 void HK::OnExe(wxCommandEvent& event)
 {
@@ -265,6 +260,28 @@ void HK::OnSearch(wxCommandEvent& event)
 }
 void HK::OnDelete(wxCommandEvent& event)
 {
+}
+void HK::registerHK()
+{
+	if (key[0] != 'F') {
+		int keyCODE = VkKeyScanExA((int)key[0], GetKeyboardLayout(0));
+		UnregisterHotKey(ID);
+		RegisterHotKey(ID, mod, keyCODE);
+	}
+	else {
+		if (key == "F1") { UnregisterHotKey(ID); RegisterHotKey(ID, mod, 0x70); }
+		else if (key == "F2") { UnregisterHotKey(ID); RegisterHotKey(ID, mod, 0x71); }
+		else if (key == "F3") { UnregisterHotKey(ID); RegisterHotKey(ID, mod, 0x72); }
+		else if (key == "F4") { UnregisterHotKey(ID); RegisterHotKey(ID, mod, 0x73); }
+		else if (key == "F5") { UnregisterHotKey(ID); RegisterHotKey(ID, mod, 0x74); }
+		else if (key == "F6") { UnregisterHotKey(ID); RegisterHotKey(ID, mod, 0x75); }
+		else if (key == "F7") { UnregisterHotKey(ID); RegisterHotKey(ID, mod, 0x76); }
+		else if (key == "F8") { UnregisterHotKey(ID); RegisterHotKey(ID, mod, 0x77); }
+		else if (key == "F9") { UnregisterHotKey(ID); RegisterHotKey(ID, mod, 0x78); }
+		else if (key == "F10") { UnregisterHotKey(ID); RegisterHotKey(ID, mod, 0x79); }
+		else if (key == "F11") { UnregisterHotKey(ID); RegisterHotKey(ID, mod, 0x7A); }
+		else if (key == "F12") { UnregisterHotKey(ID); RegisterHotKey(ID, mod, 0x7B); }
+	}
 }
 void HK::test(wxKeyEvent& event) {
 	if (C.exe->GetValue() == "Default") 
