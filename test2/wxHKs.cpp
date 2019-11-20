@@ -96,11 +96,14 @@ HK::HK(wxWindow* parent, wxWindowID id, long c, wxString m, wxString k, wxString
 		}
 		// vis
 		{
+			if (v == "True") { vis = true; }
+			else if (v == "False") { vis = false; }
+			else { wxMessageBox("'v' (HK::vis) (from HK::HK) is nither true nor false"); }
+
 			C.vis->Append("True");
 			C.vis->Append("False");
-			C.vis->SetSelection(0);
+			C.vis->SetSelection(C.vis->FindString(v));
 		}
-		// todo: arg
 
 		vbox->Add(C.mod, 0, wxCENTER | wxALL, 2);
 		vbox->Add(C.key, 0, wxCENTER | wxALL, 2);
@@ -132,7 +135,7 @@ HK::HK(wxWindow* parent, wxWindowID id, long c, wxString m, wxString k, wxString
 	// register and bind hotkey
 	{
 		ID = ID_nextHK;
-		Bind(wxEVT_HOTKEY, &HK::test, this, ID);
+		Bind(wxEVT_HOTKEY, &HK::executeHK, this, ID);
 		ID_next_hotkey++;
 
 		if (c)
@@ -157,8 +160,8 @@ HK::~HK()
 	searchBTN->Destroy();
 	deleteBTN->Destroy();
 
-	//HKs.erase(HKs.begin() + index);
-
+	UnregisterHotKey(ID);
+	Unbind(wxEVT_HOTKEY, &HK::executeHK, this, ID);
 }
 void HK::OnCheckBox(wxCommandEvent& event)
 {
@@ -241,6 +244,9 @@ void HK::OnVis(wxCommandEvent& event)
 {
 	wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + key);
 	rk.SetValue("vis", C.vis->GetValue());
+
+	if (vis) { vis = false; }
+	else { vis = true; }
 }
 void HK::OnArg(wxCommandEvent& event)
 {
@@ -283,16 +289,22 @@ void HK::registerHK()
 		else if (key == "F12") { UnregisterHotKey(ID); RegisterHotKey(ID, mod, 0x7B); }
 	}
 }
-void HK::test(wxKeyEvent& event) {
+void HK::executeHK(wxKeyEvent& event) {
+	
+	int arg;
+	if (vis == false) { arg = SW_HIDE; }
+	else if (vis == true) { arg = SW_SHOW; }
+	else { wxMessageBox("vis (HK::executeHK) is not true nor false"); }
+
 	if (C.exe->GetValue() == "Default") 
 	{
-		ShellExecuteA(0, 0, C.arg->GetValue(), 0, 0, SW_MAXIMIZE);
+		ShellExecuteA(0, 0, C.arg->GetValue(), 0, 0, arg);
 	}
 	else 
 	{
 		wxRegKey rg(wxRegKey::HKCU, "Software\\wxHKs\\"); 
 		wxString exePATH; rg.QueryValue(C.exe->GetValue(), exePATH);
-		ShellExecuteA(0, "open", exePATH, C.arg->GetValue(), 0, SW_MAXIMIZE);
+		ShellExecuteA(0, "open", exePATH, C.arg->GetValue(), 0, arg);
 	}
 }
 

@@ -34,6 +34,7 @@ public:
 public:
 	wxBoxSizer* vbox;
 	wxString key;
+	bool vis;
 	int mod;
 	int ID;
 public:
@@ -48,7 +49,7 @@ public:
 	void OnSearch(wxCommandEvent& event);
 	void OnDelete(wxCommandEvent& event);
 	void registerHK();
-	void test(wxKeyEvent& event);
+	void executeHK(wxKeyEvent& event);
 
 };
 
