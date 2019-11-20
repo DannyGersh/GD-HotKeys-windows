@@ -12,7 +12,6 @@ bool finSetup{ false };
 struct MODS {
 	std::pair<wxString, int> ctrl{ "CTRL", wxMOD_CONTROL };
 	std::pair<wxString, int> alt{ "ALT", wxMOD_ALT };
-	std::pair<wxString, int> win{ "WIN", wxMOD_WIN };
 	std::pair<wxString, int> shift{ "SHIFT", wxMOD_SHIFT };
 	std::pair<wxString, int> none{ "NONE", 0 };
 } mods;
@@ -27,7 +26,7 @@ public:
 		wxComboBox* key; // keyboard key
 		wxComboBox* exe; // path to executible
 		wxComboBox* vis; // will the window be visible
-		wxComboBox* arg; // path to the file to be executed, with args.
+		wxTextCtrl* arg; // path to the file to be executed, with args.
 	} C;
 	wxButton* searchBTN;
 	wxButton* deleteBTN;

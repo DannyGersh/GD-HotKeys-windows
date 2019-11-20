@@ -28,7 +28,7 @@ HK::HK(wxWindow* parent, wxWindowID id, long c, wxString m, wxString k, wxString
 			new wxComboBox(this, ID_nextHK + 1, k),
 			new wxComboBox(this, ID_nextHK + 3, e, wxDefaultPosition, wxDefaultSize, 0, 0, wxCB_READONLY),
 			new wxComboBox(this, ID_nextHK + 4, v, wxDefaultPosition, wxDefaultSize, 0, 0, wxCB_READONLY),
-			new wxComboBox(this, ID_nextHK + 5, a),
+			new wxTextCtrl(this, ID_nextHK + 5, a),
 		};
 		searchBTN = new wxButton(this, ID_nextHK + 6, "6");
 		deleteBTN = new wxButton(this, ID_nextHK + 7, "7");
@@ -60,11 +60,15 @@ HK::HK(wxWindow* parent, wxWindowID id, long c, wxString m, wxString k, wxString
 	{
 		// mod
 		{
-			wxString strList[5]{ "CTRL", "ALT", "WIN", "SHIFT", "NONE" };
-			C.mod->Append(wxArrayString(5, strList));
+			wxString strList[5]{ "CTRL", "ALT", "SHIFT", "NONE" };
+			C.mod->Append(wxArrayString(4, strList));
 			int index = C.mod->FindString(m);
 			C.mod->SetSelection(index);
-			mod = mods.ctrl.second;
+
+			if (m == mods.ctrl.first) { mod = mods.ctrl.second; }
+			if (m == mods.alt.first) { mod = mods.alt.second; }
+			if (m == mods.none.first) { mod = mods.none.second; }
+			if (m == mods.shift.first) { mod = mods.shift.second; }
 		}
 		// key
 		{
@@ -88,6 +92,7 @@ HK::HK(wxWindow* parent, wxWindowID id, long c, wxString m, wxString k, wxString
 			}
 			int index = C.exe->FindString(e);
 			C.exe->SetSelection(index);
+
 		}
 		// vis
 		{
@@ -124,19 +129,16 @@ HK::HK(wxWindow* parent, wxWindowID id, long c, wxString m, wxString k, wxString
 		Bind(wxEVT_BUTTON, &HK::OnDelete, this, ID_nextHK + 7);
 	}
 
-	// bind and register hotkey
+	// register and bind hotkey
 	{
-		if (C.key->GetValue() != "key") {
-			ID = ID_nextHK;
+		ID = ID_nextHK;
+		Bind(wxEVT_HOTKEY, &HK::test, this, ID);
+		ID_next_hotkey++;
+
+		if (c)
+		{
 			int keyCODE = VkKeyScanExA(k[0], GetKeyboardLayout(0));
-			RegisterHotKey(ID, mods.ctrl.second, keyCODE);
-			Bind(wxEVT_HOTKEY, &HK::test, this, ID);
-			ID_next_hotkey++;
-		}
-		else{
-			// pseudo register hotkey
-			RegisterHotKey(ID, mods.ctrl.second, 0);
-			Bind(wxEVT_HOTKEY, &HK::test, this, ID);
+			RegisterHotKey(ID, mod, keyCODE);
 		}
 	}
 
@@ -164,6 +166,10 @@ void HK::OnCheckBox(wxCommandEvent& event)
 	wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + C.key->GetValue());
 
 	if (this->CheckBox->GetValue() == true) {
+
+		int keyCODE = VkKeyScanExA((int)key[0], GetKeyboardLayout(0));
+		RegisterHotKey(ID, mod, keyCODE);
+
 		C.key->Enable(true);
 		C.mod->Enable(true);
 		C.exe->Enable(true);
@@ -171,8 +177,12 @@ void HK::OnCheckBox(wxCommandEvent& event)
 		C.arg->Enable(true);
 		searchBTN->Enable(true);
 		rk.SetValue("checkbox", 1);
+
 	}
 	else {
+
+		UnregisterHotKey(ID);
+
 		C.key->Enable(false);
 		C.mod->Enable(false);
 		C.exe->Enable(false);
@@ -180,6 +190,7 @@ void HK::OnCheckBox(wxCommandEvent& event)
 		C.arg->Enable(false);
 		searchBTN->Enable(false);
 		rk.SetValue("checkbox", 0);
+
 	}
 }
 void HK::OnKey(wxCommandEvent& event)
@@ -211,7 +222,7 @@ void HK::OnKey(wxCommandEvent& event)
 			C.key->ChangeValue(oldVal);
 		}
 	}
-} 
+}
 void HK::OnMod(wxCommandEvent& event)
 {
 	wxString m = C.mod->GetValue();
@@ -221,7 +232,6 @@ void HK::OnMod(wxCommandEvent& event)
 	if (m == mods.alt.first) { mod = mods.alt.second; }
 	if (m == mods.none.first) { mod = mods.none.second; }
 	if (m == mods.shift.first) { mod = mods.shift.second; }
-	if (m == mods.win.first) { mod = mods.win.second; }
 
 	int keyCODE = VkKeyScanExA((int)key[0], GetKeyboardLayout(0));
 	UnregisterHotKey(ID);
@@ -249,7 +259,16 @@ void HK::OnDelete(wxCommandEvent& event)
 {
 }
 void HK::test(wxKeyEvent& event) {
-	ShellExecuteA(0, "open", "C:\\danny\\poooppp.txt", 0, 0, SW_MAXIMIZE);
+	if (C.exe->GetValue() == "Default") 
+	{
+		ShellExecuteA(0, 0, C.arg->GetValue(), 0, 0, SW_MAXIMIZE);
+	}
+	else 
+	{
+		wxRegKey rg(wxRegKey::HKCU, "Software\\wxHKs\\"); 
+		wxString exePATH; rg.QueryValue(C.exe->GetValue(), exePATH);
+		ShellExecuteA(0, "open", exePATH, C.arg->GetValue(), 0, SW_MAXIMIZE);
+	}
 }
 
 
@@ -260,7 +279,7 @@ void MainScrollWND::newHK() {
 
 	if (isinKEYs("key") == false)
 	{
-		HK* h = new HK(this, wxID_ANY, 1, "CTRL", "key", "Paint", "is visible", "file path");
+		HK* h = new HK(this, wxID_ANY, 1, "CTRL", "key", "Default", "is visible", "file path");
 		
 		// main
 		{
@@ -372,7 +391,7 @@ MainFrame::MainFrame()
 		if (Kmain.Create(false)) 
 		{
 			wxMessageBox("Software\\wxHKs regKEY created");
-			Kmain.SetValue("Paint", "C:\\Windows\\System32\\mspaint.exe");
+			Kmain.SetValue("Default", " ");
 			this->MainScroll->newHK();
 		}
 		else {
