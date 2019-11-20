@@ -148,13 +148,20 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Main.cpp" />
     <ClCompile Include="ViewEXEs.cpp" />
+    <ClCompile Include="wxHKs.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include.h" />
-    <ClInclude Include="Main.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="ViewEXEs.h" />
+    <ClInclude Include="wxHKs.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="win32HKs.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

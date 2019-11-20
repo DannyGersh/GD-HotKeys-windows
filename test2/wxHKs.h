@@ -1,34 +1,7 @@
-#include <wx/wxprec.h>
-#ifndef WX_PRECOMP
-#include <wx/wx.h>
-#include <wx/msw/registry.h>
-#endif
-
-#include "ViewEXEs.h"
-#include <vector>
 
 
-int ID_nextHK = 100;
-bool finSetup{ false };
-bool processTextCtrl{ true };
-wxArrayString STRkeys; // for cheking if a new key is unique.
-
-
-struct MODS {
-	struct pair {
-		wxString str;
-		int vk;
-	};
-	pair ctrl { "CTRL", wxMOD_CONTROL};
-	pair alt  { "ALT", wxMOD_ALT };
-	pair win  { "WIN", wxMOD_WIN };
-	pair shift{ "SHIFT", wxMOD_SHIFT };
-	pair none { "NONE", 0 };
-} mods;
-
-
-
-class HK : public wxWindow {
+class HK : public wxWindow
+{
 public:
 	wxCheckBox* CheckBox;
 	struct c {
@@ -38,27 +11,56 @@ public:
 		wxComboBox* vis; // will the window be visible
 		wxComboBox* arg; // path to the file to be executed, with args.
 	} C;
-	wxButton* folderBTN;
-	wxButton* delBTN;
+	wxButton* searchBTN;
+	wxButton* deleteBTN;
 public:
-	wxBoxSizer* vbox = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* vbox;
 	wxString key;
+	int index;
 public:
 	HK(wxWindow* parent, wxWindowID id);
+	~HK();
 	void OnCheckBox(wxCommandEvent& event);
 	void OnKey(wxCommandEvent& event);
 	void OnMod(wxCommandEvent& event);
 	void OnExe(wxCommandEvent& event);
 	void OnVis(wxCommandEvent& event);
 	void OnArg(wxCommandEvent& event);
-	void OnFolderBTN(wxCommandEvent& event);
-	void OnDelBTN(wxCommandEvent& event);
+	void OnSearch(wxCommandEvent& event);
+	void OnDelete(wxCommandEvent& event);
 
 	void test(wxKeyEvent& event);
+
 };
+
+std::vector<HK*> HKs;
+bool isinKEYs(wxString str) {
+	int count{ 0 };
+	for (auto& i : HKs) {
+		if (i->key == str) {
+			return true;
+		}
+		count++;
+	}
+	return false;
+};
+bool isinARGs(wxString str) {
+	int count{ 0 };
+	for (auto& i : HKs) {
+		if (i->C.arg->GetValue() == str) {
+			return true;
+		}
+		count++;
+	}
+	return false;
+}
+
 
 class MainScrollWND : public wxScrolledWindow
 {
+private:
+	std::vector<HK*> HKs;
+
 public:
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -66,7 +68,9 @@ public:
 	MainScrollWND(wxWindow* parent, wxWindowID id);
 	void newHK();
 	void getHKs();
+
 };
+
 
 
 
@@ -74,10 +78,6 @@ class MainApp : public wxApp
 {
 public:
 	virtual bool OnInit();
-
-	//void poop() {
-	//	wxMessageBox("POOP");
-	//}
 
 };
 

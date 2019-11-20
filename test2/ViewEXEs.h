@@ -1,21 +1,43 @@
-#include "wx/wxprec.h"
 #include "Include.h"
 
 
-class EXE : public wxWindow {
+class EXE : public wxWindow 
+{
 public:
-	wxComboBox* pathCMB; 
-	wxButton* folderBTN;
-	wxButton* delBTN;
+	struct Controls {
+		wxTextCtrl* name;
+		wxTextCtrl* path;
+		wxButton* search;
+		wxButton* del;
+	} c;
+
+public:
+	/*
+	pair< constant oldVal, changing newVal >
+	this is to enable the user to press OK or CANCEL.
+	oldVal is the old registry value name, 
+	that will be changed to newVal if OK precced.
+	*/
+	wxString originalNAME;
+	wxString originalPATH;
+
 public:
 	wxBoxSizer* vbox = new wxBoxSizer(wxHORIZONTAL);
+
 public:
-	EXE(wxWindow* parent, wxWindowID id);
-	void OnPathCMB(wxCommandEvent& event);
-	void OnFolderBTN(wxCommandEvent& event);
-	void OnDelBTN(wxCommandEvent& event);
+	EXE(wxWindow* parent, wxWindowID id, wxString name, wxString path);
+	void OnName(wxCommandEvent& event);
+	void OnPath(wxCommandEvent& event);
+	void OnSearch(wxCommandEvent& event);
+	void OnDel(wxCommandEvent& event);
 
 };
+
+// pair < original exe name, changing name >
+extern std::vector<  pair<wxString, wxString>  > namePAIRS;
+// pair < original exe path, changing path >
+extern std::vector<  pair<wxString, wxString>  > pathPAIRS;
+extern std::vector<EXE*> EXEs;
 
 class EXEScrollWND : public wxScrolledWindow
 {
@@ -29,28 +51,34 @@ public:
 };
 
 
-
 class EXEsFrame : public wxFrame
 {
 public:
-	EXEScrollWND* scrollwnd;
 	wxBoxSizer* MAINsizer;
+	EXEScrollWND* scrollwnd;
 
 public:
 	EXEsFrame();
+	~EXEsFrame();
+
 private:
 	void OnNewEXE(wxCommandEvent& event);
-	void OnDel(wxCommandEvent& event);
+	void OnCancle(wxCommandEvent& event);
+	void OnOK(wxCommandEvent& event); // defined in Main.cpp for access to other classes
 
 };
+
 
 
 enum
 {
 	ID_newEXE = 200,
-	ID_pathCMB = 201,
-	ID_folderBTN = 202,
-	ID_delBTN = 203
+	ID_name = 201,
+	ID_path = 202,
+	ID_search = 203,
+	ID_del = 204,
+	ID_cancel = 205,
+	ID_ok = 206
 };
 
 
