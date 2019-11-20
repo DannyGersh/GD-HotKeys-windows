@@ -254,6 +254,14 @@ void HK::OnArg(wxCommandEvent& event)
 }
 void HK::OnSearch(wxCommandEvent& event)
 {
+	wxFileDialog
+		openFileDialog(this, _("Open XYZ file"), "", "",
+			"", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+	if (openFileDialog.ShowModal() == wxID_OK) 
+	{
+		C.arg->SetValue(openFileDialog.GetPath());
+	}
+
 }
 void HK::OnDelete(wxCommandEvent& event)
 {

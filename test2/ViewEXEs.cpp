@@ -47,6 +47,13 @@ EXE::EXE(wxWindow* parent, wxWindowID id, wxString name, wxString path) : wxWind
 }
 void EXE::OnSearch(wxCommandEvent& event)
 {
+	wxFileDialog
+		openFileDialog(this, _("Open XYZ file"), "", "",
+			"", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+	if (openFileDialog.ShowModal() == wxID_OK)
+	{
+		c.path->SetValue(openFileDialog.GetPath());
+	}
 }
 void EXE::OnDel(wxCommandEvent& event)
 {
@@ -73,14 +80,16 @@ void EXEScrollWND::getEXEs()
 		 
 	for (size_t i = 0; i < values; i++)
 	{
-		wxString data; rk.QueryValue(valueNAME, data);
-	
-		EXE* h = new EXE(this, wxID_ANY, valueNAME, data);
-		sizer->Add(h, 0, wxEXPAND, 2);
-		this->SetSizer(sizer);
-		this->FitInside();
-		this->SetScrollRate(10, 10);
-	
+		if (valueNAME != "Default")
+		{
+			wxString data; rk.QueryValue(valueNAME, data);
+
+			EXE* h = new EXE(this, wxID_ANY, valueNAME, data);
+			sizer->Add(h, 0, wxEXPAND, 2);
+			this->SetSizer(sizer);
+			this->FitInside();
+			this->SetScrollRate(10, 10);
+		}
 		rk.GetNextValue(valueNAME, why);
 	}
 }
