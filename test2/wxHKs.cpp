@@ -2,26 +2,6 @@
 #include "wxHKs.h"
 #include "ViewEXEs.h"
 
-extern int ID_nextHK{ 100 };
-extern bool finSetup{ false };
-extern MODS mods{
-	{ "CTRL", wxMOD_CONTROL },
-	{ "ALT", wxMOD_ALT },
-	{ "WIN", wxMOD_WIN },
-	{ "SHIFT", wxMOD_SHIFT },
-	{ "NONE", 0 }
-};
-
-
-wxIMPLEMENT_APP(MainApp);
-
-/*
-if (!RegisterHotKey(12345, 0, 'Q'))
-{
-	wxMessageBox("RegisterHotKey faild");
-}
-Bind(wxEVT_HOTKEY, &HK::test, this, 12345);
-*/
 
 bool MainApp::OnInit()
 {
@@ -30,28 +10,25 @@ bool MainApp::OnInit()
 
 	return true;
 }
+wxIMPLEMENT_APP(MainApp);
 
 
-HK::HK(wxWindow* parent, wxWindowID id)
+HK::HK(wxWindow* parent, wxWindowID id, long c, wxString m, wxString k, wxString e, wxString v, wxString a)
 	: 
 	wxWindow(parent, id)
 {	
-	RegisterHotKey(12345, mods.ctrl.b, 0x70);
-	Bind(wxEVT_HOTKEY, &HK::test, this, 12345);
-
 	vbox = new wxBoxSizer(wxHORIZONTAL);
 	ID_nextHK += 8;
-	index = HKs.size();
 
 	// init controls
 	{
 		CheckBox = new wxCheckBox(this, ID_nextHK, "");
 		C = {
-			new wxComboBox(this, ID_nextHK + 2, "mod", wxDefaultPosition, wxDefaultSize, 0, 0, wxCB_READONLY),
-			new wxComboBox(this, ID_nextHK + 1, "key"),
-			new wxComboBox(this, ID_nextHK + 3, "exe path", wxDefaultPosition, wxDefaultSize, 0, 0, wxCB_READONLY),
-			new wxComboBox(this, ID_nextHK + 4, "is visible", wxDefaultPosition, wxDefaultSize, 0, 0, wxCB_READONLY),
-			new wxComboBox(this, ID_nextHK + 5, "file path"),
+			new wxComboBox(this, ID_nextHK + 2, m, wxDefaultPosition, wxDefaultSize, 0, 0, wxCB_READONLY),
+			new wxComboBox(this, ID_nextHK + 1, k),
+			new wxComboBox(this, ID_nextHK + 3, e, wxDefaultPosition, wxDefaultSize, 0, 0, wxCB_READONLY),
+			new wxComboBox(this, ID_nextHK + 4, v, wxDefaultPosition, wxDefaultSize, 0, 0, wxCB_READONLY),
+			new wxComboBox(this, ID_nextHK + 5, a),
 		};
 		searchBTN = new wxButton(this, ID_nextHK + 6, "6");
 		deleteBTN = new wxButton(this, ID_nextHK + 7, "7");
@@ -59,7 +36,23 @@ HK::HK(wxWindow* parent, wxWindowID id)
 
 	// checkbox
 	{
-		CheckBox->SetValue(true);
+		if (c) {
+			C.key->Enable(true);
+			C.mod->Enable(true);
+			C.exe->Enable(true);
+			C.vis->Enable(true);
+			C.arg->Enable(true);
+			searchBTN->Enable(true);
+		}
+		else {
+			C.key->Enable(false);
+			C.mod->Enable(false);
+			C.exe->Enable(false);
+			C.vis->Enable(false);
+			C.arg->Enable(false);
+			searchBTN->Enable(false);
+		}
+		CheckBox->SetValue(c);
 		vbox->Add(CheckBox, 0, wxCENTER | wxALL | wxRIGHT, 2);
 	}
 	 
@@ -69,13 +62,16 @@ HK::HK(wxWindow* parent, wxWindowID id)
 		{
 			wxString strList[5]{ "CTRL", "ALT", "WIN", "SHIFT", "NONE" };
 			C.mod->Append(wxArrayString(5, strList));
-			C.mod->SetSelection(0);
+			int index = C.mod->FindString(m);
+			C.mod->SetSelection(index);
 		}
 		// key
 		{
 			for (int i = 1; i <= 12; i++) {
 				C.key->Append("F" + std::to_string(i));
 			}
+			C.key->SetValue(k);
+			key = k;
 		}
 		// exe
 		{
@@ -89,7 +85,8 @@ HK::HK(wxWindow* parent, wxWindowID id)
 				C.exe->Append(valueNAME);
 				rk.GetNextValue(valueNAME, why);
 			}
-			C.exe->SetSelection(0);
+			int index = C.exe->FindString(e);
+			C.exe->SetSelection(index);
 		}
 		// vis
 		{
@@ -97,12 +94,13 @@ HK::HK(wxWindow* parent, wxWindowID id)
 			C.vis->Append("False");
 			C.vis->SetSelection(0);
 		}
+		// todo: arg
 
 		vbox->Add(C.mod, 0, wxCENTER | wxALL, 2);
 		vbox->Add(C.key, 0, wxCENTER | wxALL, 2);
 		vbox->Add(C.exe, 0, wxCENTER | wxALL, 2);
 		vbox->Add(C.vis, 0, wxCENTER | wxALL, 2);
-		vbox->Add(C.arg, 1, wxCENTER | wxALL, 2);
+		vbox->Add(C.arg, 1, wxCENTER | wxALL, 2); // note second arg
 	}
 
 	// buttons
@@ -123,6 +121,22 @@ HK::HK(wxWindow* parent, wxWindowID id)
 		Bind(wxEVT_TEXT, &HK::OnArg, this, ID_nextHK + 5);
 		Bind(wxEVT_BUTTON, &HK::OnSearch, this, ID_nextHK + 6);
 		Bind(wxEVT_BUTTON, &HK::OnDelete, this, ID_nextHK + 7);
+	}
+
+	// bind and register hotkey
+	{
+		if (C.key->GetValue() != "key") {
+			ID = ID_nextHK;
+			int keyCODE = VkKeyScanExA(k[0], GetKeyboardLayout(0));
+			RegisterHotKey(ID, mods.ctrl.second, keyCODE);
+			Bind(wxEVT_HOTKEY, &HK::test, this, ID);
+			ID_next_hotkey++;
+		}
+		else{
+			// pseudo register hotkey
+			RegisterHotKey(ID, mods.ctrl.second, 0);
+			Bind(wxEVT_HOTKEY, &HK::test, this, ID);
+		}
 	}
 
 	HKs.push_back(this);
@@ -146,7 +160,7 @@ HK::~HK()
 }
 void HK::OnCheckBox(wxCommandEvent& event)
 {
-	wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + key);
+	wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + C.key->GetValue());
 
 	if (this->CheckBox->GetValue() == true) {
 		C.key->Enable(true);
@@ -185,6 +199,11 @@ void HK::OnKey(wxCommandEvent& event)
 			this->key = newVal;
 			rk.Rename(newVal);
 			rk.SetValue("key", newVal);
+
+			int NEWkeyCODE = VkKeyScanExA((int)newVal[0], GetKeyboardLayout(0));
+			int OLDkeyCODE = VkKeyScanExA((int)oldVal[0], GetKeyboardLayout(0));
+			UnregisterHotKey(ID);
+			RegisterHotKey(ID, mods.ctrl.second, NEWkeyCODE);
 		}
 		else
 		{
@@ -219,11 +238,9 @@ void HK::OnSearch(wxCommandEvent& event)
 void HK::OnDelete(wxCommandEvent& event)
 {
 }
-
 void HK::test(wxKeyEvent& event) {
-	wxMessageBox("POOP");
+	ShellExecuteA(0, "open", "C:\\danny\\poooppp.txt", 0, 0, SW_MAXIMIZE);
 }
-
 
 
 MainScrollWND::MainScrollWND(wxWindow* parent, wxWindowID id)
@@ -233,11 +250,10 @@ void MainScrollWND::newHK() {
 
 	if (isinKEYs("key") == false)
 	{
+		HK* h = new HK(this, wxID_ANY, 1, "CTRL", "key", "Paint", "is visible", "file path");
+		
 		// main
 		{
-			HK* h = new HK(this, wxID_ANY);
-			h->key = "key";
-
 			sizer->Add(h, 0, wxEXPAND, 2);
 			this->SetSizer(sizer);
 			this->FitInside();
@@ -250,9 +266,9 @@ void MainScrollWND::newHK() {
 			if (k.Create(false)) {
 				k.SetValue("checkbox", 1);
 				k.SetValue("key", "key");
-				k.SetValue("mod", "mod");
-				k.SetValue("exe", "exe path");
-				k.SetValue("vis", "is visible");
+				k.SetValue("mod", h->C.mod->GetString(0));
+				k.SetValue("exe", h->C.exe->GetString(0));
+				k.SetValue("vis", h->C.vis->GetString(0));
 				k.SetValue("arg", "file path");
 			}
 		}
@@ -261,75 +277,37 @@ void MainScrollWND::newHK() {
 }
 void MainScrollWND::getHKs() {
 	
-	wxRegKey Kmain(wxRegKey::HKCU, "Software\\wxHKs");
-	Kmain.Open();
-
-	size_t subkeys;
-	wxString key_name;
-	long why{ 1 };
-
+	wxRegKey Kmain(wxRegKey::HKCU, "Software\\wxHKs"); Kmain.Open();
+	size_t subkeys; wxString key_name; long why{ 1 };
 	Kmain.GetKeyInfo(&subkeys, NULL, NULL, NULL);
 	Kmain.GetFirstKey(key_name, why); 
 
 	for (size_t i = 0; i < subkeys; i++)
 	{
-		HK* h = new HK(this, wxID_ANY);
-		sizer->Add(h, 0, wxEXPAND, 2);
-		this->SetSizer(sizer);
-		this->FitInside();
+		long checkbox; wxString mod, key, exe, vis, arg; 
 		
-		long checkbox; wxString key, mod, exe, vis, arg;
-
-		// registry
+		// quary values
 		{
 			wxRegKey k0(wxRegKey::HKCU, "Software\\wxHKs\\" + key_name);
-
 			k0.QueryValue("checkbox", &checkbox);
-			k0.QueryValue("key", key); h->key = key;
 			k0.QueryValue("mod", mod);
+			k0.QueryValue("key", key);
 			k0.QueryValue("exe", exe);
 			k0.QueryValue("vis", vis);
 			k0.QueryValue("arg", arg);
 		}
 
-		// set control values
-		{
-			h->CheckBox->SetValue(checkbox);
-			h->C.key->SetValue(key);
-			h->C.mod->SetValue(mod);
-			h->C.exe->SetValue(exe);
-			h->C.vis->SetValue(vis);
-			h->C.arg->SetValue(arg);
+		HK* h = new HK(this, wxID_ANY, checkbox, mod, key, exe, vis, arg);
+		sizer->Add(h, 0, wxEXPAND, 2);
+		this->SetSizer(sizer);
+		this->FitInside();
 
-			h->key = key;
-		}
-
-		// checkbox
-		{
-			if (checkbox > 0) {
-				h->C.key->Enable(true);
-				h->C.mod->Enable(true);
-				h->C.exe->Enable(true);
-				h->C.vis->Enable(true);
-				h->C.arg->Enable(true);
-				h->searchBTN->Enable(true);
-			}
-			else {
-				h->C.key->Enable(false);
-				h->C.mod->Enable(false);
-				h->C.exe->Enable(false);
-				h->C.vis->Enable(false);
-				h->C.arg->Enable(false);
-				h->searchBTN->Enable(false);
-			}
-		}
- 
 		Kmain.GetNextKey(key_name, why);
 	}
 }
-
-
-
+void MainScrollWND::test(wxKeyEvent& event) {
+	ShellExecuteA(0, "open", "C:\\danny\\poooppp.txt", 0, 0, SW_MAXIMIZE);
+}
 
 MainFrame::MainFrame()
 	: wxFrame(NULL, wxID_ANY, "wx Hotkeys")
@@ -492,10 +470,11 @@ void EXEsFrame::OnOK(wxCommandEvent& event)
 
 				wxString newNAME = i->c.name->GetValue();
 				wxString oldNAME = i->originalNAME;
-
+				
 				for (auto& ii : HKs) {
+
 					int index = ii->C.exe->FindString(oldNAME);
-					
+
 					if (index == wxNOT_FOUND) 
 					{
 						ii->C.exe->Append(newNAME);
@@ -520,7 +499,6 @@ void EXEsFrame::OnOK(wxCommandEvent& event)
 		this->Close();
 	}
 
-	
 }
 
 

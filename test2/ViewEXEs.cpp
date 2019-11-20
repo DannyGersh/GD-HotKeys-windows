@@ -1,22 +1,15 @@
 #include "wx/wxprec.h"
 #include "ViewEXEs.h"
 
-extern int ID_nextHK;
-extern bool finSetup;
-extern MODS mods;
 
-// pair < original exe name, changing name > // from ViewEXEs.h
-std::vector<  pair<wxString, wxString>  > namePAIRS; //extern
-std::vector<  pair<wxString, wxString>  > pathPAIRS; //extern
-std::vector<EXE*> EXEs; // extern
-
+std::vector<EXE*> EXEs;
 
 EXE::EXE(wxWindow* parent, wxWindowID id, wxString name, wxString path) : wxWindow(parent, id)
 {
 	// text controls
 	{
-		c.name = new wxTextCtrl(this, ID_name, name, wxDefaultPosition, wxSize(150, 10));
-		c.path = new wxTextCtrl(this, ID_path, path);
+		c.name = new wxTextCtrl(this, wxID_ANY, name, wxDefaultPosition, wxSize(150, 10));
+		c.path = new wxTextCtrl(this, wxID_ANY, path);
 		vbox->Add(c.name, 0, wxCENTER | wxALL | wxEXPAND, 2);
 		vbox->Add(c.path, 1, wxCENTER | wxALL | wxEXPAND, 2);
 	} 
@@ -40,8 +33,6 @@ EXE::EXE(wxWindow* parent, wxWindowID id, wxString name, wxString path) : wxWind
 
 	// bind events
 	{
-		Bind(wxEVT_TEXT, &EXE::OnName, this, ID_name);
-		Bind(wxEVT_TEXT, &EXE::OnPath, this, ID_path);
 		Bind(wxEVT_BUTTON, &EXE::OnSearch, this, ID_search);
 		Bind(wxEVT_BUTTON, &EXE::OnDel, this, ID_del);
 	}
@@ -54,21 +45,12 @@ EXE::EXE(wxWindow* parent, wxWindowID id, wxString name, wxString path) : wxWind
 	this->FitInside();
 
 }
-void EXE::OnName(wxCommandEvent& event)
-{
-}
-void EXE::OnPath(wxCommandEvent& event)
-{
-}
 void EXE::OnSearch(wxCommandEvent& event)
 {
 }
 void EXE::OnDel(wxCommandEvent& event)
 {
 }
-
-
-
 
 EXEScrollWND::EXEScrollWND(wxWindow* parent, wxWindowID id)
 	: wxScrolledWindow(parent, id)
@@ -103,7 +85,6 @@ void EXEScrollWND::getEXEs()
 	}
 }
 
-
 EXEsFrame::EXEsFrame()
 	: wxFrame(NULL, wxID_ANY, "Hello World")
 {
@@ -116,9 +97,6 @@ EXEsFrame::EXEsFrame()
 
 		for (size_t i = 0; i < valuews; i++)
 		{
-			// pair < original_VAL, VAL_to_change >
-			pair<wxString, wxString> P{ valueNAME ,valueNAME };
-			namePAIRS.push_back({ valueNAME, valueNAME  });
 			rkMAIN.GetNextValue(valueNAME, why);
 		}
 	}
@@ -158,7 +136,6 @@ EXEsFrame::~EXEsFrame()
 {
 	scrollwnd->Close();
 	EXEs.clear();
-	namePAIRS.clear();
 }
 void EXEsFrame::OnNewEXE(wxCommandEvent& event)
 {

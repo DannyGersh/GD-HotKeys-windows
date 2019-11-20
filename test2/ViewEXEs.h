@@ -26,18 +26,13 @@ public:
 
 public:
 	EXE(wxWindow* parent, wxWindowID id, wxString name, wxString path);
-	void OnName(wxCommandEvent& event);
-	void OnPath(wxCommandEvent& event);
 	void OnSearch(wxCommandEvent& event);
 	void OnDel(wxCommandEvent& event);
 
 };
 
-// pair < original exe name, changing name >
-extern std::vector<  pair<wxString, wxString>  > namePAIRS;
-// pair < original exe path, changing path >
-extern std::vector<  pair<wxString, wxString>  > pathPAIRS;
 extern std::vector<EXE*> EXEs;
+
 
 class EXEScrollWND : public wxScrolledWindow
 {
@@ -73,12 +68,10 @@ private:
 enum
 {
 	ID_newEXE = 200,
-	ID_name = 201,
-	ID_path = 202,
-	ID_search = 203,
-	ID_del = 204,
-	ID_cancel = 205,
-	ID_ok = 206
+	ID_search = 202,
+	ID_del = 203,
+	ID_cancel = 204,
+	ID_ok = 205
 };
 
 

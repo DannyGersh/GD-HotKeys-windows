@@ -1,3 +1,21 @@
+#include "Include.h"
+
+class MainApp : public wxApp
+{
+public:
+	virtual bool OnInit();
+
+};
+int  ID_nextHK{ 100 };
+int  ID_next_hotkey{ 500 };
+bool finSetup{ false };
+struct MODS {
+	std::pair<wxString, int> ctrl{ "CTRL", wxMOD_CONTROL };
+	std::pair<wxString, int> alt{ "ALT", wxMOD_ALT };
+	std::pair<wxString, int> win{ "WIN", wxMOD_WIN };
+	std::pair<wxString, int> shift{ "SHIFT", wxMOD_SHIFT };
+	std::pair<wxString, int> none{ "NONE", 0 };
+} mods;
 
 
 class HK : public wxWindow
@@ -16,9 +34,9 @@ public:
 public:
 	wxBoxSizer* vbox;
 	wxString key;
-	int index;
+	int ID;
 public:
-	HK(wxWindow* parent, wxWindowID id);
+	HK(wxWindow* parent, wxWindowID id, long c, wxString m, wxString k, wxString e, wxString v, wxString a);
 	~HK();
 	void OnCheckBox(wxCommandEvent& event);
 	void OnKey(wxCommandEvent& event);
@@ -35,25 +53,13 @@ public:
 
 std::vector<HK*> HKs;
 bool isinKEYs(wxString str) {
-	int count{ 0 };
 	for (auto& i : HKs) {
 		if (i->key == str) {
 			return true;
 		}
-		count++;
 	}
 	return false;
 };
-bool isinARGs(wxString str) {
-	int count{ 0 };
-	for (auto& i : HKs) {
-		if (i->C.arg->GetValue() == str) {
-			return true;
-		}
-		count++;
-	}
-	return false;
-}
 
 
 class MainScrollWND : public wxScrolledWindow
@@ -68,18 +74,10 @@ public:
 	MainScrollWND(wxWindow* parent, wxWindowID id);
 	void newHK();
 	void getHKs();
+	void test(wxKeyEvent& event);
 
 };
 
-
-
-
-class MainApp : public wxApp
-{
-public:
-	virtual bool OnInit();
-
-};
 
 class MainFrame : public wxFrame
 {
@@ -105,7 +103,6 @@ private:
 	wxDECLARE_EVENT_TABLE();
 
 };
-
 
 
 
