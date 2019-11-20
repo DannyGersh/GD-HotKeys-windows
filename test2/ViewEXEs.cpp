@@ -48,7 +48,7 @@ EXE::EXE(wxWindow* parent, wxWindowID id, wxString name, wxString path) : wxWind
 void EXE::OnSearch(wxCommandEvent& event)
 {
 	wxFileDialog
-		openFileDialog(this, _("Open XYZ file"), "", "",
+		openFileDialog(this, _("Search file"), "", "",
 			"", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 	if (openFileDialog.ShowModal() == wxID_OK)
 	{

@@ -255,7 +255,7 @@ void HK::OnArg(wxCommandEvent& event)
 void HK::OnSearch(wxCommandEvent& event)
 {
 	wxFileDialog
-		openFileDialog(this, _("Open XYZ file"), "", "",
+		openFileDialog(this, _("Search file"), "", "",
 			"", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 	if (openFileDialog.ShowModal() == wxID_OK) 
 	{
@@ -520,8 +520,12 @@ void EXEsFrame::OnOK(wxCommandEvent& event)
 					{
 						ii->C.exe->SetString(index, newNAME);
 						if (oldNAME != newNAME) {
-							wxRegKey reg(wxRegKey::HKCU, "Software\\wxHKs\\" + ii->key); 
-							reg.SetValue("exe", newNAME);
+							wxRegKey reg(wxRegKey::HKCU, "Software\\wxHKs\\" + ii->key);
+							wxString tempSTR; reg.QueryValue("exe", tempSTR);
+							if(oldNAME==tempSTR)
+							{
+								reg.SetValue("exe", newNAME);
+							}
 						}
 					}
 
