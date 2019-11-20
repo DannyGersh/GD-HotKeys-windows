@@ -34,6 +34,7 @@ public:
 public:
 	wxBoxSizer* vbox;
 	wxString key;
+	int mod;
 	int ID;
 public:
 	HK(wxWindow* parent, wxWindowID id, long c, wxString m, wxString k, wxString e, wxString v, wxString a);

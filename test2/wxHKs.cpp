@@ -64,6 +64,7 @@ HK::HK(wxWindow* parent, wxWindowID id, long c, wxString m, wxString k, wxString
 			C.mod->Append(wxArrayString(5, strList));
 			int index = C.mod->FindString(m);
 			C.mod->SetSelection(index);
+			mod = mods.ctrl.second;
 		}
 		// key
 		{
@@ -200,10 +201,9 @@ void HK::OnKey(wxCommandEvent& event)
 			rk.Rename(newVal);
 			rk.SetValue("key", newVal);
 
-			int NEWkeyCODE = VkKeyScanExA((int)newVal[0], GetKeyboardLayout(0));
-			int OLDkeyCODE = VkKeyScanExA((int)oldVal[0], GetKeyboardLayout(0));
+			int keyCODE = VkKeyScanExA((int)newVal[0], GetKeyboardLayout(0));			
 			UnregisterHotKey(ID);
-			RegisterHotKey(ID, mods.ctrl.second, NEWkeyCODE);
+			RegisterHotKey(ID, mod, keyCODE);
 		}
 		else
 		{
@@ -214,8 +214,18 @@ void HK::OnKey(wxCommandEvent& event)
 } 
 void HK::OnMod(wxCommandEvent& event)
 {
+	wxString m = C.mod->GetValue();
 	wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + key);
-	rk.SetValue("mod", C.mod->GetValue());
+	rk.SetValue("mod", m);
+	if (m == mods.ctrl.first) { mod = mods.ctrl.second;}
+	if (m == mods.alt.first) { mod = mods.alt.second; }
+	if (m == mods.none.first) { mod = mods.none.second; }
+	if (m == mods.shift.first) { mod = mods.shift.second; }
+	if (m == mods.win.first) { mod = mods.win.second; }
+
+	int keyCODE = VkKeyScanExA((int)key[0], GetKeyboardLayout(0));
+	UnregisterHotKey(ID);
+	RegisterHotKey(ID, mod, keyCODE);
 }
 void HK::OnExe(wxCommandEvent& event)
 {
