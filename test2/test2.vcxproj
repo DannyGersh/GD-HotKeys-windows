@@ -164,7 +164,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include.h" />
-    <ClInclude Include="resource.h" />
     <ClInclude Include="ViewEXEs.h" />
     <ClInclude Include="wxHKs.h" />
   </ItemGroup>

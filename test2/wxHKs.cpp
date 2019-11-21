@@ -514,6 +514,11 @@ void EXEsFrame::OnOK(wxCommandEvent& event)
 				proceed = false;
 			}
 		}
+
+		if (std::distance(EXEs.begin(), EXEs.end()) == 0)
+		{
+			proceed = true;
+		}
 	}
 	
 
@@ -526,20 +531,21 @@ void EXEsFrame::OnOK(wxCommandEvent& event)
 			reg.GetKeyInfo(NULL, NULL, &values, NULL);
 			reg.GetFirstValue(valueNAME, why);
 
-			for (size_t i = 0; i < values; i++)
+			wxArrayString arSTR;
+			for (size_t i = 0; i < values; ++i)
 			{
-				for (auto& ii : EXEs) {
-					if (valueNAME == ii->originalNAME)
-					{
-						reg.SetValue(ii->originalNAME, ii->c.path->GetValue());
-
-						if (ii->originalNAME != ii->c.name->GetValue())
-						{
-							reg.RenameValue(ii->originalNAME, ii->c.name->GetValue());
-						}
-					}
+				if (valueNAME != "Default")
+				{
+					arSTR.Add(valueNAME);
 				}
 				reg.GetNextValue(valueNAME, why);
+			}
+			for (auto&i : arSTR) {
+				reg.DeleteValue(i);
+			}
+			for (auto& i : EXEs)
+			{
+				reg.SetValue(i->c.name->GetValue(), i->c.path->GetValue());
 			}
 			reg.Close();
 		}

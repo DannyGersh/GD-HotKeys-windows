@@ -2,7 +2,7 @@
 #include "ViewEXEs.h"
 
 
-std::vector<EXE*> EXEs;
+std::forward_list<EXE*> EXEs;
 
 EXE::EXE(wxWindow* parent, wxWindowID id, wxString name, wxString path) : wxWindow(parent, id)
 {
@@ -43,7 +43,7 @@ EXE::EXE(wxWindow* parent, wxWindowID id, wxString name, wxString path) : wxWind
 
 	this->originalNAME = name;
 	this->originalPATH = path;
-	EXEs.push_back(this);
+	EXEs.emplace_after(EXEs.before_begin(), this);
 
 	this->SetSizer(vbox);
 	this->FitInside();
@@ -61,6 +61,11 @@ void EXE::OnSearch(wxCommandEvent& event)
 }
 void EXE::OnDel(wxCommandEvent& event)
 {
+	wxWindow* w = this->GetParent();
+	EXEs.remove(this);
+
+	this->Destroy();
+	w->SendSizeEvent();
 }
 
 EXEScrollWND::EXEScrollWND(wxWindow* parent, wxWindowID id)

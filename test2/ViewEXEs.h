@@ -31,7 +31,7 @@ public:
 
 };
 
-extern std::vector<EXE*> EXEs;
+extern std::forward_list<EXE*> EXEs;
 
 
 class EXEScrollWND : public wxScrolledWindow
