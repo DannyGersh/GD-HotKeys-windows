@@ -2,7 +2,7 @@
 #include "wxHKs.h"
 #include "ViewEXEs.h"
 
-// todo : newHK hase problems, add delHK functionallity.
+// todo : add delHK functionallity.
 
 bool MainApp::OnInit()
 {
@@ -272,6 +272,14 @@ void HK::OnSearch(wxCommandEvent& event)
 }
 void HK::OnDelete(wxCommandEvent& event)
 {
+	wxWindow* w = this->GetParent();
+	wxString oldKEY = key;
+	this->~HK();
+
+	w->SendSizeEvent();
+
+	wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + oldKEY);
+	rk.DeleteSelf();
 }
 void HK::registerHK()
 {
@@ -322,7 +330,7 @@ void MainScrollWND::newHK() {
 
 	if (isinKEYs("key") == false)
 	{
-		HK* h = new HK(this, wxID_ANY, 1, "CTRL", "key", "Default", "is visible", "file path");
+		HK* h = new HK(this, wxID_ANY, 1, "CTRL", "key", "Default", "True", "file path");
 		
 		// main
 		{

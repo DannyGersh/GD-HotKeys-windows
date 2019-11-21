@@ -16,7 +16,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
-    <None Include="packages.config" />
     <None Include="wx\msw\hand.cur">
       <Filter>Resource Files</Filter>
     </None>
@@ -47,6 +46,7 @@
     <None Include="wx\msw\cross.cur">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ViewEXEs.h">
