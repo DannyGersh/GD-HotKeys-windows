@@ -17,6 +17,36 @@
   <ItemGroup>
     <None Include="cpp.hint" />
     <None Include="packages.config" />
+    <None Include="wx\msw\hand.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\bullseye.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\pencil.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\magnif1.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\roller.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\pbrush.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\pntleft.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\pntright.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\blank.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\cross.cur">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ViewEXEs.h">
@@ -47,6 +77,48 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="win32HKs.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\open icon library\icons\png\24x24\places\tango-style\folder.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="wx\msw\std.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="wx\msw\folder1.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="wx\msw\folder2.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="wx\msw\file1.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="wx\msw\computer.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="wx\msw\drive.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="wx\msw\cdrom.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="wx\msw\floppy.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="wx\msw\removble.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="wx\msw\csquery.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="wx\msw\colours.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\open icon library\icons\ico\22x22\actions\dialog-cancel-3.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="wx\msw\icon1.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

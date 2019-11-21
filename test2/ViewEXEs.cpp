@@ -16,8 +16,12 @@ EXE::EXE(wxWindow* parent, wxWindowID id, wxString name, wxString path) : wxWind
 
 	// buttons
 	{
-		c.search = new wxButton(this, ID_search, "6");
-		c.del = new wxButton(this, ID_del, "7");
+		c.search = new wxButton(this, ID_search, " ");
+		c.del = new wxButton(this, ID_del, " ");
+		wxIcon search(wxICON(WXICON_SMALL_CLOSED_FOLDER));
+		wxIcon del(wxICON(IDI_ICON_DEL_CROSS));
+		c.search->SetBitmap(search);
+		c.del->SetBitmap(del);
 
 		c.search->SetMinSize({ c.search->GetSize().y, c.search->GetSize().y });
 		c.del->SetMinSize({ c.del->GetSize().y, c.del->GetSize().y });
@@ -121,6 +125,10 @@ EXEsFrame::EXEsFrame()
 		wxButton* New    = new wxButton(this, ID_newEXE, "New EXE");
 		wxButton* cancel = new wxButton(this, ID_cancel, "cancel");
 		wxButton* ok     = new wxButton(this, ID_ok, "ok");
+		
+		wxIcon ICOnewHK(wxICON(IDI_ICON_ADD_CROSS));
+		New->SetBitmap(ICOnewHK);
+
 		cancel->SetMinSize({ 100, cancel->GetSize().y });
 		ok->SetMinSize({ 100, ok->GetSize().y });
 
