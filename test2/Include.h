@@ -1,5 +1,4 @@
 #pragma once
-#include "resource.h"
 #include <wx/wxprec.h>
 #include <wx/msw/registry.h>
 #ifndef WX_PRECOMP

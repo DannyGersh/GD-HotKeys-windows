@@ -2,7 +2,7 @@
 #include "ViewEXEs.h"
 
 
-std::forward_list<EXE*> EXEs;
+std::vector<EXE*> EXEs;
 
 EXE::EXE(wxWindow* parent, wxWindowID id, wxString name, wxString path) : wxWindow(parent, id)
 {
@@ -43,7 +43,7 @@ EXE::EXE(wxWindow* parent, wxWindowID id, wxString name, wxString path) : wxWind
 
 	this->originalNAME = name;
 	this->originalPATH = path;
-	EXEs.emplace_after(EXEs.before_begin(), this);
+	EXEs.push_back(this);
 
 	this->SetSizer(vbox);
 	this->FitInside();
@@ -62,7 +62,12 @@ void EXE::OnSearch(wxCommandEvent& event)
 void EXE::OnDel(wxCommandEvent& event)
 {
 	wxWindow* w = this->GetParent();
-	EXEs.remove(this);
+	std::vector<EXE*>::iterator it = std::find(EXEs.begin(), EXEs.end(), this);
+	
+	if (it != EXEs.end()) {
+		int index = std::distance(EXEs.begin(), it);
+		EXEs.erase(EXEs.begin() + index);
+	}
 
 	this->Destroy();
 	w->SendSizeEvent();
@@ -101,25 +106,24 @@ void EXEScrollWND::getEXEs()
 		}
 		rk.GetNextValue(valueNAME, why);
 	}
+
+	if (std::distance(EXEs.begin(), EXEs.end()) == 0)
+	{
+		EXE* h = new EXE(this, wxID_ANY, "EXE name", "EXE path");
+		sizer->Add(h, 0, wxEXPAND, 2);
+		this->SetSizer(sizer);
+		this->FitInside();
+		this->SetScrollRate(10, 10);
+	}
 }
 
 EXEsFrame::EXEsFrame()
 	: wxFrame(NULL, wxID_ANY, "Hello World")
 {
-	// get original EXE names
-	{
-		size_t valuews; wxString valueNAME; long why{ 1 };
-		wxRegKey rkMAIN(wxRegKey::HKCU, "Software\\wxHKs"); rkMAIN.Open();
-		rkMAIN.GetKeyInfo(NULL, NULL, &valuews, NULL);
-		rkMAIN.GetFirstValue(valueNAME, why);
+	wxIcon ICOviewEXEs(wxICON(IDI_ICON_CONFIGURE));
+	this->SetIcon(ICOviewEXEs);
 
-		for (size_t i = 0; i < valuews; i++)
-		{
-			rkMAIN.GetNextValue(valueNAME, why);
-		}
-	}
-
-	// main
+	// add elements
 	{
 		scrollwnd = new EXEScrollWND(this, wxID_ANY);
 		MAINsizer = new wxBoxSizer(wxVERTICAL);
@@ -127,10 +131,10 @@ EXEsFrame::EXEsFrame()
 		MAINsizer->Add(scrollwnd, 1, wxEXPAND);
 
 		wxBoxSizer* hbox = new wxBoxSizer(wxHORIZONTAL);
-		wxButton* New    = new wxButton(this, ID_newEXE, "New EXE");
+		wxButton* New = new wxButton(this, ID_newEXE, "New EXE");
 		wxButton* cancel = new wxButton(this, ID_cancel, "cancel");
-		wxButton* ok     = new wxButton(this, ID_ok, "ok");
-		
+		wxButton* ok = new wxButton(this, ID_ok, "ok");
+
 		wxIcon ICOnewHK(wxICON(IDI_ICON_ADD_CROSS));
 		New->SetBitmap(ICOnewHK);
 
@@ -142,13 +146,13 @@ EXEsFrame::EXEsFrame()
 		hbox->Add(ok, 0, wxALL, 10);
 
 		MAINsizer->Add(hbox, 0, wxEXPAND | wxBOTTOM);
+
+		this->scrollwnd->getEXEs();
 	}
 
 	Bind(wxEVT_BUTTON, &EXEsFrame::OnNewEXE, this, ID_newEXE);
 	Bind(wxEVT_BUTTON, &EXEsFrame::OnCancle, this, ID_cancel);
 	Bind(wxEVT_BUTTON, &EXEsFrame::OnOK, this, ID_ok);
-
-	this->scrollwnd->getEXEs();
 
 	this->SetSize(600, 400);
 	this->SetSizer(MAINsizer);

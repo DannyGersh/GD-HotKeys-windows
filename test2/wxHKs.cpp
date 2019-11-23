@@ -2,7 +2,7 @@
 #include "wxHKs.h"
 #include "ViewEXEs.h"
 
-// todo : add delHK functionallity.
+// todo : update HKs frame after EXEs frame
 
 bool MainApp::OnInit()
 {
@@ -486,105 +486,103 @@ void MainFrame::viewEXEs(wxCommandEvent& event)
 void EXEsFrame::OnOK(wxCommandEvent& event) 
 {
 	bool proceed{ true };
-	
+	std::forward_list<wxString> testUNIQ;
+
 	// test if all names are valid
 	{
-		std::vector<EXE*> isUnique;
 		for (auto& i : EXEs)
 		{
-			isUnique.push_back(i);
 			int count{ 0 };
-			for (auto& isU : isUnique)
-			{
-				if (isU->c.name->GetValue() == i->c.name->GetValue())
-				{
+			for (auto&ii : EXEs){
+				if (ii->c.name->GetValue() == i->c.name->GetValue()){
 					count++;
 				}
-				if (count == 2)
-				{
-					wxMessageBox("all names must be unique");
+				if (count == 2){
+					wxMessageBox("make sure all names are unique");
 					proceed = false;
+					break;
 				}
 			}
-
 
 			if (i->c.name->GetValue() == "")
 			{
 				wxMessageBox("Pleas fill all names");
 				proceed = false;
 			}
-		}
 
-		if (std::distance(EXEs.begin(), EXEs.end()) == 0)
-		{
-			proceed = true;
+			if (proceed == false)
+			{
+				break;
+			}
 		}
+		
 	}
 	
-
 	if (proceed) {
 
-		// rename exe names in main RegKey
+		wxRegKey reg(wxRegKey::HKCU, "Software\\wxHKs"); reg.Open();
+		
+		// delete all values from wxHKs regKey
 		{
-			size_t values; wxString valueNAME; long why{ 1 };
-			wxRegKey reg(wxRegKey::HKCU, "Software\\wxHKs"); reg.Open();
-			reg.GetKeyInfo(NULL, NULL, &values, NULL);
+			size_t RGvalues; wxString valueNAME; long why{ 1 };
+
+			reg.GetKeyInfo(NULL, NULL, &RGvalues, NULL);
 			reg.GetFirstValue(valueNAME, why);
 
-			wxArrayString arSTR;
-			for (size_t i = 0; i < values; ++i)
-			{
-				if (valueNAME != "Default")
-				{
-					arSTR.Add(valueNAME);
-				}
+			wxArrayString deleteTHIS;
+			for (size_t i = 0; i < RGvalues; ++i) {
+				deleteTHIS.Add(valueNAME);
 				reg.GetNextValue(valueNAME, why);
 			}
-			for (auto&i : arSTR) {
+			for (auto&i : deleteTHIS) {
 				reg.DeleteValue(i);
 			}
-			for (auto& i : EXEs)
+			for (auto&i : EXEs)
 			{
 				reg.SetValue(i->c.name->GetValue(), i->c.path->GetValue());
 			}
+			reg.SetValue("Default", " ");
+
 			reg.Close();
 		}
 
-		// rename exe names in all subkeys of main key and update MainFrame
+		for (auto&hk : HKs) // appdate registry subkeys and HKs frame
 		{
-			for (auto& i : EXEs) {
+			wxRegKey subREG(wxRegKey::HKCU, "Software\\wxHKs\\" + hk->key);
+			wxComboBox* c = hk->C.exe;
 
-				wxString newNAME = i->c.name->GetValue();
-				wxString oldNAME = i->originalNAME;
+			wxString oldSELECTION = c->GetStringSelection();
+			c->Clear();
+			c->Append("Default");
+
+			for (auto&exe : EXEs)
+			{
+				wxString oldNAME = exe->originalNAME;
+				wxString newNAME = exe->c.name->GetValue();
 				
-				for (auto& ii : HKs) {
+				c->Append(newNAME);
 
-					int index = ii->C.exe->FindString(oldNAME);
+				if (oldNAME == oldSELECTION) // the selected string wase changed
+				{
+					c->SetStringSelection(newNAME);
 
-					if (index == wxNOT_FOUND) 
-					{
-						ii->C.exe->Append(newNAME);
-					}
-					else
-					{
-						ii->C.exe->SetString(index, newNAME);
-						if (oldNAME != newNAME) {
-							wxRegKey reg(wxRegKey::HKCU, "Software\\wxHKs\\" + ii->key);
-							wxString tempSTR; reg.QueryValue("exe", tempSTR);
-							if(oldNAME==tempSTR)
-							{
-								reg.SetValue("exe", newNAME);
-							}
-						}
-					}
-
-					wxWindow* w = ii->GetParent();
-					ii->C.exe->Fit();
-					w->SendSizeEvent();
+					wxRegKey subREG(wxRegKey::HKCU, "Software\\wxHKs\\" + hk->key);
+					subREG.SetValue("exe", newNAME);
 
 				}
+
+			}
+
+			if (c->GetValue() == "")
+			{
+				// selected value wase deleted.
+				c->SetSelection(c->FindString("Default"));
+				subREG.SetValue("exe", "Default");
 			}
 		}
+		
+		wxWindow* hkFRAME = HKs[0]->GetParent();
+		hkFRAME->SendSizeEvent();
 
 		this->Close();
 	}
