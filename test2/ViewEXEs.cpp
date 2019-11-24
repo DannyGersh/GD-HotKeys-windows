@@ -117,8 +117,8 @@ void EXEScrollWND::getEXEs()
 	}
 }
 
-EXEsFrame::EXEsFrame()
-	: wxFrame(NULL, wxID_ANY, "Hello World")
+EXEsFrame::EXEsFrame(wxWindow* parent)
+	: wxFrame(parent, wxID_ANY, "Hello World")
 {
 	wxIcon ICOviewEXEs(wxICON(IDI_ICON_CONFIGURE));
 	this->SetIcon(ICOviewEXEs);

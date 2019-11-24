@@ -54,6 +54,7 @@ HK::HK(wxWindow* parent, wxWindowID id, long c, wxString m, wxString k, wxString
 			searchBTN->Enable(false);
 		}
 		CheckBox->SetValue(c);
+
 		vbox->Add(CheckBox, 0, wxCENTER | wxALL | wxRIGHT, 2);
 	}
 	 
@@ -124,6 +125,28 @@ HK::HK(wxWindow* parent, wxWindowID id, long c, wxString m, wxString k, wxString
 		wxIcon del(wxICON(IDI_ICON_DEL_CROSS));
 		searchBTN->SetBitmap(search);
 		deleteBTN->SetBitmap(del);
+	}
+
+	// set toolTips
+	{
+		wxToolTip* t = new wxToolTip("Enable or disable the hotkey");
+		t->SetDelay(2000);
+		CheckBox->SetToolTip(t);
+		t = new wxToolTip("MODS: ctrl, alt, shift, none");
+		t->SetDelay(2000); t->SetReshow(2000);
+		C.mod->SetToolTip(t);
+		t = new wxToolTip("Any key in the keyboard");
+		t->SetDelay(2000); t->SetReshow(2000);
+		C.key->SetToolTip(t);
+		t = new wxToolTip("The app that executes the file you spesify");
+		t->SetDelay(2000); t->SetReshow(2000);
+		C.exe->SetToolTip(t);
+		t = new wxToolTip("Determin if the window will be visible or not");
+		t->SetDelay(2000); t->SetReshow(2000);
+		C.vis->SetToolTip(t);
+		t = new wxToolTip("The file path to be executed");
+		t->SetDelay(2000); t->SetReshow(2000);
+		C.arg->SetToolTip(t);
 	}
 
 	// bind events
@@ -476,7 +499,7 @@ void MainFrame::newHK(wxCommandEvent& event)
 }
 void MainFrame::viewEXEs(wxCommandEvent& event) 
 {
-	EXEsFrame * exe = new EXEsFrame();
+	EXEsFrame * exe = new EXEsFrame(this);
 	exe->Show();
 }
 

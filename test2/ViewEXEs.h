@@ -53,7 +53,7 @@ public:
 	EXEScrollWND* scrollwnd;
 
 public:
-	EXEsFrame();
+	EXEsFrame(wxWindow* parent);
 	~EXEsFrame();
 
 private:
