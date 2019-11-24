@@ -1,8 +1,9 @@
 #include "wx/wxprec.h"
 #include "wxHKs.h"
-#include "ViewEXEs.h"
 
-// todo : update HKs frame after EXEs frame
+
+
+
 
 bool MainApp::OnInit()
 {
@@ -89,12 +90,15 @@ HK::HK(wxWindow* parent, wxWindowID id, long c, wxString m, wxString k, wxString
 
 			for (size_t i = 0; i < values; i++)
 			{
-				C.exe->Append(valueNAME);
+				if (valueNAME != "Start_on_boot")
+				{
+					C.exe->Append(valueNAME);
+				}
 				rk.GetNextValue(valueNAME, why);
 			}
+
 			int index = C.exe->FindString(e);
 			C.exe->SetSelection(index);
-
 		}
 		// vis
 		{
@@ -416,7 +420,9 @@ MainFrame::MainFrame()
 	: wxFrame(NULL, wxID_ANY, "wx Hotkeys")
 {
 	this->SetIcon(wxICON(IDI_ICON));
-	// menue
+	trayICON = new TrayIcon(this);
+
+	// menu
 	{
 		menuFile = new wxMenu;
 		menuFile->Append(ID_Hello, "&Hello...\tCtrl-H",
@@ -466,6 +472,7 @@ MainFrame::MainFrame()
 		{
 			wxMessageBox("Software\\wxHKs regKEY created");
 			Kmain.SetValue("Default", " ");
+			Kmain.SetValue("Start_on_boot", "true");
 			this->MainScroll->newHK();
 		}
 		else {
@@ -478,6 +485,10 @@ MainFrame::MainFrame()
 	this->Show();
 
 	finSetup = true;
+}
+MainFrame::~MainFrame()
+{
+	trayICON->~TrayIcon();
 }
 void MainFrame::OnExit(wxCommandEvent& event)
 {
@@ -554,7 +565,10 @@ void EXEsFrame::OnOK(wxCommandEvent& event)
 
 			wxArrayString deleteTHIS;
 			for (size_t i = 0; i < RGvalues; ++i) {
-				deleteTHIS.Add(valueNAME);
+				if (valueNAME != "Start_on_boot")
+				{
+					deleteTHIS.Add(valueNAME);
+				}
 				reg.GetNextValue(valueNAME, why);
 			}
 			for (auto&i : deleteTHIS) {
@@ -611,6 +625,14 @@ void EXEsFrame::OnOK(wxCommandEvent& event)
 	}
 
 }
+
+
+
+
+
+
+
+
 
 
 

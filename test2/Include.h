@@ -6,7 +6,7 @@
 #endif
 
 #include <forward_list>
-
+#include <wx/taskbar.h>
 
 
 

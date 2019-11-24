@@ -94,7 +94,7 @@ void EXEScrollWND::getEXEs()
 		 
 	for (size_t i = 0; i < values; i++)
 	{
-		if (valueNAME != "Default")
+		if (valueNAME != "Default" && valueNAME != "Start_on_boot")
 		{
 			wxString data; rk.QueryValue(valueNAME, data);
 

@@ -1,4 +1,6 @@
 #include "Include.h"
+#include "ViewEXEs.h"
+#include "trayICON.h"
 
 
 class MainApp : public wxApp
@@ -88,12 +90,15 @@ public:
 	wxMenu* menuFile;
 	wxMenu* menuHelp;
 	wxMenuBar* menuBar;
+	TrayIcon* trayICON;
+	
 
 	MainScrollWND* MainScroll;
 	wxBoxSizer* MAINsizer;
 
 public:
 	MainFrame();
+	~MainFrame();
 
 private:
 	void OnHello(wxCommandEvent& event);
@@ -114,7 +119,9 @@ enum
 	ID_Hello = 100,
 	ID_newHKbtn = 101,
 	ID_viewEXEs = 102,
-	ID_test = 103
+	ID_test = 103,
+
+	ID_ONtrayLEFT = 104
 };
 
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)

@@ -58,12 +58,18 @@
     <ClInclude Include="wxHKs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="trayICON.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ViewEXEs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="wxHKs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="trayICON.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

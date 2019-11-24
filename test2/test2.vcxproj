@@ -159,11 +159,13 @@
     <None Include="wx\msw\roller.cur" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="trayICON.cpp" />
     <ClCompile Include="ViewEXEs.cpp" />
     <ClCompile Include="wxHKs.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include.h" />
+    <ClInclude Include="trayICON.h" />
     <ClInclude Include="ViewEXEs.h" />
     <ClInclude Include="wxHKs.h" />
   </ItemGroup>
