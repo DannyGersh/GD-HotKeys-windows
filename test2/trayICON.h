@@ -18,7 +18,7 @@ public:
 	~TrayIcon();
 
 	void OnLeftClick(wxTaskBarIconEvent&);
-	void OnMenuExit(wxCommandEvent&);
+	void OnQuit(wxCommandEvent&);
 	void OnStartOnBoot(wxCommandEvent&);
 	void OnStartOnBootUI(wxUpdateUIEvent&);
 	virtual wxMenu *CreatePopupMenu() wxOVERRIDE;

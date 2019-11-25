@@ -12,6 +12,7 @@ public:
 int  ID_nextHK{ 100 };
 int  ID_next_hotkey{ 500 };
 bool finSetup{ false };
+bool startHIDEN;
 struct MODS {
 	std::pair<wxString, int> ctrl{ "CTRL", wxMOD_CONTROL };
 	std::pair<wxString, int> alt{ "ALT", wxMOD_ALT };
@@ -108,6 +109,8 @@ private:
 	void newHK(wxCommandEvent& event);
 	void viewEXEs(wxCommandEvent& event);
 
+	void close(wxCloseEvent& event);
+
 	wxDECLARE_EVENT_TABLE();
 
 };
@@ -132,6 +135,8 @@ EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
 
 EVT_BUTTON(ID_newHKbtn, MainFrame::newHK)
 EVT_BUTTON(ID_viewEXEs, MainFrame::viewEXEs)
+
+EVT_CLOSE(MainFrame::close)
 
 wxEND_EVENT_TABLE()
 

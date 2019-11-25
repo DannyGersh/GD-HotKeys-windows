@@ -1,14 +1,17 @@
 #include "wx/wxprec.h"
 #include "wxHKs.h"
 
-
-
-
+// todo: enable windows service
+// https://github.com/harikvpy/winservice/blob/master/conslsvc.h
 
 bool MainApp::OnInit()
 {
+	if (MainApp::argc == 2)
+	{
+		startHIDEN = true;
+	}
+
 	MainFrame *frame = new MainFrame();
-	frame->Show(true);
 
 	return true;
 }
@@ -482,7 +485,11 @@ MainFrame::MainFrame()
 
 	this->SetSize(800, 500);
 	this->SetSizer(MAINsizer);
-	this->Show();
+	
+	if (startHIDEN == false)
+	{
+		this->Show();
+	}
 
 	finSetup = true;
 }
@@ -492,8 +499,14 @@ MainFrame::~MainFrame()
 }
 void MainFrame::OnExit(wxCommandEvent& event)
 {
-	Close(true);
+	this->Destroy();
 }
+void MainFrame::close(wxCloseEvent& event)
+{
+	this->Show(false);
+}
+
+
 void MainFrame::OnAbout(wxCommandEvent& event)
 {
 	wxMessageBox("This is a wxWidgets Hello World example",
@@ -581,7 +594,7 @@ void EXEsFrame::OnOK(wxCommandEvent& event)
 			reg.SetValue("Default", " ");
 
 			reg.Close();
-		}
+		}	
 
 		for (auto&hk : HKs) // appdate registry subkeys and HKs frame
 		{

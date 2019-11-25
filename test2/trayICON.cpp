@@ -18,9 +18,9 @@ TrayIcon::~TrayIcon()
 	this->Destroy();
 }
 
-void TrayIcon::OnMenuExit(wxCommandEvent&)
+void TrayIcon::OnQuit(wxCommandEvent&)
 {
-	mainFrame->Close(true);
+	mainFrame->Destroy();
 }
 void TrayIcon::OnStartOnBoot(wxCommandEvent&)
 {
@@ -79,7 +79,7 @@ void TrayIcon::OnLeftClick(wxTaskBarIconEvent&)
 
 
 wxBEGIN_EVENT_TABLE(TrayIcon, wxTaskBarIcon)
-EVT_MENU(ID_QUIT, TrayIcon::OnMenuExit)
+EVT_MENU(ID_QUIT, TrayIcon::OnQuit)
 EVT_MENU(ID_START_ON_BOOT, TrayIcon::OnStartOnBoot)
 EVT_UPDATE_UI(ID_START_ON_BOOT, TrayIcon::OnStartOnBootUI)
 EVT_TASKBAR_LEFT_UP(TrayIcon::OnLeftClick)
