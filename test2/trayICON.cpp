@@ -8,10 +8,9 @@ TrayIcon::TrayIcon(wxFrame* _mainFrame)
 	mainFrame = _mainFrame;
 	SetIcon(wxICON(IDI_ICON));
 
-	wxRegKey reg(wxRegKey::HKCU, "Software\\wxHKs");
-	wxString isCheck; reg.QueryValue("Start_on_boot", isCheck);
-	if (isCheck == "true") { check = true; }
-	else { check = false; }
+	wxRegKey reg(wxRegKey::HKCU, "Software\\Microsoft\\Windows\\CurrentVersion\\Run");
+	if (reg.HasValue("wxHKs")) { check = true; }
+	else{ check = false; }
 }
 TrayIcon::~TrayIcon()
 {

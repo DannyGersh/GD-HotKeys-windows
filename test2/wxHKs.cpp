@@ -7,11 +7,6 @@ bool MainApp::OnInit()
 {
 	thisPATH = argv[0];
 
-	if (MainApp::argc == 2)
-	{
-		startHIDEN = true;
-	}
-
 	MainFrame *frame = new MainFrame();
 
 	return true;
@@ -94,10 +89,7 @@ HK::HK(wxWindow* parent, wxWindowID id, long c, wxString m, wxString k, wxString
 
 			for (size_t i = 0; i < values; i++)
 			{
-				if (valueNAME != "Start_on_boot")
-				{
-					C.exe->Append(valueNAME);
-				}
+				C.exe->Append(valueNAME);
 				rk.GetNextValue(valueNAME, why);
 			}
 
@@ -472,11 +464,9 @@ MainFrame::MainFrame()
 	{
 		wxRegKey Kmain(wxRegKey::HKCU, "Software\\wxHKs");
 
-		if (Kmain.Create(false)) 
+		if (Kmain.Create(false)) // create base registry key
 		{
-			wxMessageBox("Software\\wxHKs regKEY created");
 			Kmain.SetValue("Default", " ");
-			Kmain.SetValue("Start_on_boot", "true");
 			this->MainScroll->newHK();
 		}
 		else {
@@ -578,14 +568,13 @@ void EXEsFrame::OnOK(wxCommandEvent& event)
 			reg.GetFirstValue(valueNAME, why);
 
 			wxArrayString deleteTHIS;
-			for (size_t i = 0; i < RGvalues; ++i) {
-				if (valueNAME != "Start_on_boot")
-				{
-					deleteTHIS.Add(valueNAME);
-				}
+			for (size_t i = 0; i < RGvalues; ++i) 
+			{
+				deleteTHIS.Add(valueNAME);
 				reg.GetNextValue(valueNAME, why);
 			}
-			for (auto&i : deleteTHIS) {
+			for (auto&i : deleteTHIS) 
+			{
 				reg.DeleteValue(i);
 			}
 			for (auto&i : EXEs)
