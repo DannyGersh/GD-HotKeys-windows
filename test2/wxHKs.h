@@ -13,6 +13,7 @@ int  ID_nextHK{ 100 };
 int  ID_next_hotkey{ 500 };
 bool finSetup{ false };
 bool startHIDEN;
+wxString thisPATH;
 struct MODS {
 	std::pair<wxString, int> ctrl{ "CTRL", wxMOD_CONTROL };
 	std::pair<wxString, int> alt{ "ALT", wxMOD_ALT };

@@ -1,6 +1,9 @@
 #pragma once
 #include "Include.h"
 
+extern wxString thisPATH;
+
+
 enum
 {
 	ID_START_ON_BOOT,

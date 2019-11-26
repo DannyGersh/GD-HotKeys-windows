@@ -7,9 +7,6 @@
 
 #include <forward_list>
 #include <wx/taskbar.h>
-
-
-
-
+#include <wx/stdpaths.h>
 
 

@@ -26,24 +26,32 @@ void TrayIcon::OnStartOnBoot(wxCommandEvent&)
 {
 	if (check)
 	{
-		wxRegKey reg(wxRegKey::HKCU, "Software\\wxHKs");
-		reg.SetValue("Start_on_boot", "false");
-
 		wxMessageBox(
 			"wxHKs will not start when your computer is turnd on.\n"
 			"note that when this is activated, no window from this\n"
 			"softwer will pop up when your computer starts."
 		);
+
+		wxRegKey reg(wxRegKey::HKCU, "Software\\Microsoft\\Windows\\CurrentVersion\\Run");
+		if (reg.Exists() == false)
+			wxMessageBox("canot start on startup");
+		else
+			if (reg.HasValue("wxHKs"))
+				reg.DeleteValue("wxHKs");
+
 	}
 	else
 	{
-		wxRegKey reg(wxRegKey::HKCU, "Software\\wxHKs");
-		reg.SetValue("Start_on_boot", "true");
-
 		wxMessageBox(
 			"wxHKs will start working in the backgrownd\n"
 			"when your computer is turnd on.\n"
 		);
+
+		wxRegKey reg(wxRegKey::HKCU, "Software\\Microsoft\\Windows\\CurrentVersion\\Run");
+		if (reg.Exists() == false)
+			wxMessageBox("canot start on startup");
+		else
+			reg.SetValue("wxHKs", "\"" + thisPATH + "\" /MINIMIZED");
 	}
 	check = !check;
 }
@@ -70,6 +78,9 @@ void TrayIcon::OnLeftClick(wxTaskBarIconEvent&)
 	}
 	else
 	{
+		mainFrame->Iconize(false); 
+		mainFrame->SetFocus();
+		mainFrame->Raise();  
 		mainFrame->Show(true);
 	}
 }

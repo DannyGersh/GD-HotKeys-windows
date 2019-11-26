@@ -2,10 +2,11 @@
 #include "wxHKs.h"
 
 // todo: enable windows service
-// https://github.com/harikvpy/winservice/blob/master/conslsvc.h
 
 bool MainApp::OnInit()
 {
+	thisPATH = argv[0];
+
 	if (MainApp::argc == 2)
 	{
 		startHIDEN = true;
