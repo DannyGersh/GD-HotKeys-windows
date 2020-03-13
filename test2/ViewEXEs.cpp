@@ -22,8 +22,8 @@ EXE::EXE(wxWindow* parent, wxWindowID id, wxString name, wxString path) : wxWind
 		wxBitmap del(wxICON(IDI_ICON_DEL_CROSS));
 
 		wxSize size(c.path->GetSize().y + 2, c.path->GetSize().y + 2);
-		wxImage IMGsearch = search.ConvertToImage().Rescale(size.y - 3, size.y - 3);
-		wxImage IMGdel = del.ConvertToImage().Rescale(size.y - 3, size.y - 3);
+		wxImage IMGsearch = search.ConvertToImage().Rescale(size.y - 4, size.y - 4);
+		wxImage IMGdel = del.ConvertToImage().Rescale(size.y - 4, size.y - 4);
 
 		c.search->SetBitmap(IMGsearch);
 		c.del->SetBitmap(IMGdel);

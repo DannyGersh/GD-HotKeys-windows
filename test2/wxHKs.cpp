@@ -125,8 +125,8 @@ HK::HK(wxWindow* parent, wxWindowID id, long c, wxString m, wxString k, wxString
 
 		wxBitmap search(wxICON(WXICON_SMALL_CLOSED_FOLDER));
 		wxBitmap del(wxICON(IDI_ICON_DEL_CROSS));
-		wxImage IMGsearch = search.ConvertToImage().Rescale(size.y - 3, size.y - 3);
-		wxImage IMGdel = del.ConvertToImage().Rescale(size.y - 3, size.y - 3);
+		wxImage IMGsearch = search.ConvertToImage().Rescale(size.y - 4, size.y - 4);
+		wxImage IMGdel = del.ConvertToImage().Rescale(size.y - 4, size.y - 4);
 		
 		searchBTN->SetBitmap(IMGsearch);
 		deleteBTN->SetBitmap(IMGdel);
