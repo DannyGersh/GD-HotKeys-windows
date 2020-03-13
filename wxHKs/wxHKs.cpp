@@ -6,7 +6,7 @@
 bool MainApp::OnInit()
 {
 	thisPATH = argv[0];
-	bootARG = argv[1];
+	if (argc > 1) bootARG = argv[1];
 
 	MainFrame *frame = new MainFrame();
 
