@@ -200,8 +200,8 @@ void HK::OnCheckBox(wxCommandEvent& event)
 	if (this->CheckBox->GetValue() == true) {
 
 		int keyCODE = VkKeyScanExA((int)key[0], GetKeyboardLayout(0));
-		RegisterHotKey(ID, mod, keyCODE);
-
+		registerHK();
+		
 		C.key->Enable(true);
 		C.mod->Enable(true);
 		C.exe->Enable(true);
@@ -209,7 +209,6 @@ void HK::OnCheckBox(wxCommandEvent& event)
 		C.arg->Enable(true);
 		searchBTN->Enable(true);
 		rk.SetValue("checkbox", 1);
-
 	}
 	else {
 

@@ -2,7 +2,6 @@
 #include "ViewEXEs.h"
 #include "trayICON.h"
 
-
 class MainApp : public wxApp
 {
 public:
