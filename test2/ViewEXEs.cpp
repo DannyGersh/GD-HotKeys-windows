@@ -94,7 +94,7 @@ void EXEScrollWND::getEXEs()
 		 
 	for (size_t i = 0; i < values; i++)
 	{
-		if (valueNAME != "Default" && valueNAME != "Start_on_boot")
+		if (valueNAME != "Default" && valueNAME != "Start_on_boot" && valueNAME != "EXE name")
 		{
 			wxString data; rk.QueryValue(valueNAME, data);
 
@@ -107,18 +107,18 @@ void EXEScrollWND::getEXEs()
 		rk.GetNextValue(valueNAME, why);
 	}
 
-	if (std::distance(EXEs.begin(), EXEs.end()) == 0)
-	{
-		EXE* h = new EXE(this, wxID_ANY, "EXE name", "EXE path");
-		sizer->Add(h, 0, wxEXPAND, 2);
-		this->SetSizer(sizer);
-		this->FitInside();
-		this->SetScrollRate(10, 10);
-	}
+	//if (std::distance(EXEs.begin(), EXEs.end()) == 0)
+	//{
+	//	EXE* h = new EXE(this, wxID_ANY, "EXE name", "EXE path");
+	//	sizer->Add(h, 0, wxEXPAND, 2);
+	//	this->SetSizer(sizer);
+	//	this->FitInside();
+	//	this->SetScrollRate(10, 10);
+	//}
 }
 
 EXEsFrame::EXEsFrame(wxWindow* parent)
-	: wxFrame(parent, wxID_ANY, "Hello World")
+	: wxFrame(parent, wxID_ANY, "EXE settings")
 {
 	wxIcon ICOviewEXEs(wxICON(IDI_ICON_CONFIGURE));
 	this->SetIcon(ICOviewEXEs);
@@ -134,16 +134,13 @@ EXEsFrame::EXEsFrame(wxWindow* parent)
 		wxButton* New = new wxButton(this, ID_newEXE, "New EXE");
 		wxButton* cancel = new wxButton(this, ID_cancel, "cancel");
 		wxButton* ok = new wxButton(this, ID_ok, "ok");
-
+		
 		wxIcon ICOnewHK(wxICON(IDI_ICON_ADD_CROSS));
 		New->SetBitmap(ICOnewHK);
 
-		cancel->SetMinSize({ 100, cancel->GetSize().y });
-		ok->SetMinSize({ 100, ok->GetSize().y });
-
 		hbox->Add(New, 1, wxALL, 10);
-		hbox->Add(cancel, 0, wxALL, 10);
-		hbox->Add(ok, 0, wxALL, 10);
+		hbox->Add(cancel, 0, wxALL | wxEXPAND, 10);
+		hbox->Add(ok, 0, wxALL | wxEXPAND, 10);
 
 		MAINsizer->Add(hbox, 0, wxEXPAND | wxBOTTOM);
 

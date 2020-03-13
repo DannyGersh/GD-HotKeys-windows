@@ -32,8 +32,8 @@ HK::HK(wxWindow* parent, wxWindowID id, long c, wxString m, wxString k, wxString
 			new wxComboBox(this, ID_nextHK + 4, v, wxDefaultPosition, wxDefaultSize, 0, 0, wxCB_READONLY),
 			new wxTextCtrl(this, ID_nextHK + 5, a),
 		};
-		searchBTN = new wxButton(this, ID_nextHK + 6, " ");
-		deleteBTN = new wxButton(this, ID_nextHK + 7, " ");
+		searchBTN = new wxButton(this, ID_nextHK + 6, "");
+		deleteBTN = new wxButton(this, ID_nextHK + 7, "");
 	}
 
 	// checkbox
@@ -117,15 +117,19 @@ HK::HK(wxWindow* parent, wxWindowID id, long c, wxString m, wxString k, wxString
 
 	// buttons
 	{
-		searchBTN->SetMinSize({ searchBTN->GetSize().y, searchBTN->GetSize().y });
-		deleteBTN->SetMinSize({ deleteBTN->GetSize().y, deleteBTN->GetSize().y });
-		vbox->Add(searchBTN, 0, wxALL, 2);
-		vbox->Add(deleteBTN, 0, wxALL, 2);
+		wxSize size(C.arg->GetSize().y+2, C.arg->GetSize().y+2);
+		searchBTN->SetMinSize(size);
+		deleteBTN->SetMinSize(size);
+		vbox->Add(searchBTN, 0, wxALL | wxEXPAND);
+		vbox->Add(deleteBTN, 0, wxALL | wxEXPAND);
 
-		wxIcon search(wxICON(WXICON_SMALL_CLOSED_FOLDER));
-		wxIcon del(wxICON(IDI_ICON_DEL_CROSS));
-		searchBTN->SetBitmap(search);
-		deleteBTN->SetBitmap(del);
+		wxBitmap search(wxICON(WXICON_SMALL_CLOSED_FOLDER));
+		wxBitmap del(wxICON(IDI_ICON_DEL_CROSS));
+		wxImage IMGsearch = search.ConvertToImage().Rescale(size.y - 3, size.y - 3);
+		wxImage IMGdel = del.ConvertToImage().Rescale(size.y - 3, size.y - 3);
+		
+		searchBTN->SetBitmap(IMGsearch);
+		deleteBTN->SetBitmap(IMGdel);
 	}
 
 	// set toolTips
@@ -410,7 +414,7 @@ void MainScrollWND::getHKs() {
 }
 
 MainFrame::MainFrame()
-	: wxFrame(NULL, wxID_ANY, "wx Hotkeys")
+	: wxFrame(NULL, wxID_ANY, "wxHotkeys")
 {
 	this->SetIcon(wxICON(IDI_ICON));
 	trayICON = new TrayIcon(this);
@@ -550,7 +554,7 @@ void EXEsFrame::OnOK(wxCommandEvent& event)
 			reg.Close();
 		}	
 
-		for (auto&hk : HKs) // appdate registry subkeys and HKs frame
+		for (auto&hk : HKs) // uppdate registry subkeys and HKs frame
 		{
 			wxRegKey subREG(wxRegKey::HKCU, "Software\\wxHKs\\" + hk->key);
 			wxComboBox* c = hk->C.exe;
