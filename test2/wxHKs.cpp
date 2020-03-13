@@ -6,6 +6,7 @@
 bool MainApp::OnInit()
 {
 	thisPATH = argv[0];
+	bootARG = argv[1];
 
 	MainFrame *frame = new MainFrame();
 
@@ -335,13 +336,13 @@ void HK::executeHK(wxKeyEvent& event) {
 
 	if (C.exe->GetValue() == "Default") 
 	{
-		ShellExecuteA(0, 0, C.arg->GetValue(), 0, 0, arg);
+		ShellExecuteA(0, 0, C.arg->GetValue().c_str(), 0, 0, arg);
 	}
 	else 
 	{
 		wxRegKey rg(wxRegKey::HKCU, "Software\\wxHKs\\"); 
 		wxString exePATH; rg.QueryValue(C.exe->GetValue(), exePATH);
-		ShellExecuteA(0, "open", exePATH, C.arg->GetValue(), 0, arg);
+		ShellExecuteA(0, "open", exePATH.c_str(), C.arg->GetValue().c_str(), 0, arg);
 	}
 }
 
@@ -477,7 +478,7 @@ MainFrame::MainFrame()
 	this->SetSize(800, 500);
 	this->SetSizer(MAINsizer);
 	
-	if (startHIDEN == false)
+	if (bootARG != "/MINIMIZED")
 	{
 		this->Show();
 	}
