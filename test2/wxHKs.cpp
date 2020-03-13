@@ -520,6 +520,7 @@ void EXEsFrame::OnOK(wxCommandEvent& event)
 			{
 				break;
 			}
+
 		}
 		
 	}
@@ -568,7 +569,10 @@ void EXEsFrame::OnOK(wxCommandEvent& event)
 				wxString oldNAME = exe->originalNAME;
 				wxString newNAME = exe->c.name->GetValue();
 				
-				c->Append(newNAME);
+				if (newNAME != "EXE name" && exe->c.path->GetValue() != "EXE path")
+				{
+					c->Append(newNAME);
+				}
 
 				if (oldNAME == oldSELECTION) // the selected string wase changed
 				{

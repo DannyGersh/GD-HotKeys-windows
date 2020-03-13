@@ -18,13 +18,18 @@ EXE::EXE(wxWindow* parent, wxWindowID id, wxString name, wxString path) : wxWind
 	{
 		c.search = new wxButton(this, ID_search, " ");
 		c.del = new wxButton(this, ID_del, " ");
-		wxIcon search(wxICON(WXICON_SMALL_CLOSED_FOLDER));
-		wxIcon del(wxICON(IDI_ICON_DEL_CROSS));
-		c.search->SetBitmap(search);
-		c.del->SetBitmap(del);
+		wxBitmap search(wxICON(WXICON_SMALL_CLOSED_FOLDER));
+		wxBitmap del(wxICON(IDI_ICON_DEL_CROSS));
 
-		c.search->SetMinSize({ c.search->GetSize().y, c.search->GetSize().y });
-		c.del->SetMinSize({ c.del->GetSize().y, c.del->GetSize().y });
+		wxSize size(c.path->GetSize().y + 2, c.path->GetSize().y + 2);
+		wxImage IMGsearch = search.ConvertToImage().Rescale(size.y - 3, size.y - 3);
+		wxImage IMGdel = del.ConvertToImage().Rescale(size.y - 3, size.y - 3);
+
+		c.search->SetBitmap(IMGsearch);
+		c.del->SetBitmap(IMGdel);
+
+		c.search->SetMinSize(size);
+		c.del->SetMinSize(size);
 		vbox->Add(c.search, 0, wxALL, 2);
 		vbox->Add(c.del, 0, wxALL, 2);
 	}
