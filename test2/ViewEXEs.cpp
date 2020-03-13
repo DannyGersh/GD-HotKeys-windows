@@ -171,6 +171,6 @@ void EXEsFrame::OnNewEXE(wxCommandEvent& event)
 }
 void EXEsFrame::OnCancle(wxCommandEvent& event)
 {
-	this->Close();
+	this->Destroy();
 }
 

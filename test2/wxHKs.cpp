@@ -404,10 +404,13 @@ void MainScrollWND::getHKs() {
 			k0.QueryValue("arg", arg);
 		}
 
-		HK* h = new HK(this, wxID_ANY, checkbox, mod, key, exe, vis, arg);
-		sizer->Add(h, 0, wxEXPAND, 2);
-		this->SetSizer(sizer);
-		this->FitInside();
+		if (exe != "EXE name")
+		{
+			HK* h = new HK(this, wxID_ANY, checkbox, mod, key, exe, vis, arg);
+			sizer->Add(h, 0, wxEXPAND, 2);
+			this->SetSizer(sizer);
+			this->FitInside();
+		}
 
 		Kmain.GetNextKey(key_name, why);
 	}
@@ -569,7 +572,7 @@ void EXEsFrame::OnOK(wxCommandEvent& event)
 				wxString oldNAME = exe->originalNAME;
 				wxString newNAME = exe->c.name->GetValue();
 				
-				if (newNAME != "EXE name" && exe->c.path->GetValue() != "EXE path")
+				if (newNAME != "EXE name")
 				{
 					c->Append(newNAME);
 				}
@@ -580,7 +583,6 @@ void EXEsFrame::OnOK(wxCommandEvent& event)
 
 					wxRegKey subREG(wxRegKey::HKCU, "Software\\wxHKs\\" + hk->key);
 					subREG.SetValue("exe", newNAME);
-
 				}
 
 			}
