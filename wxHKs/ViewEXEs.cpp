@@ -66,16 +66,23 @@ void EXE::OnSearch(wxCommandEvent& event)
 }
 void EXE::OnDel(wxCommandEvent& event)
 {
-	wxWindow* w = this->GetParent();
-	std::vector<EXE*>::iterator it = std::find(EXEs.begin(), EXEs.end(), this);
-	
-	if (it != EXEs.end()) {
-		int index = std::distance(EXEs.begin(), it);
-		EXEs.erase(EXEs.begin() + index);
-	}
+	wxMessageDialog* dialog = new wxMessageDialog(NULL,
+		wxT("Are you sure ?"), wxT(" "),
+		wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION);
 
-	this->Destroy();
-	w->SendSizeEvent();
+	if (dialog->ShowModal() == wxID_YES)
+	{
+		wxWindow* w = this->GetParent();
+		std::vector<EXE*>::iterator it = std::find(EXEs.begin(), EXEs.end(), this);
+
+		if (it != EXEs.end()) {
+			int index = std::distance(EXEs.begin(), it);
+			EXEs.erase(EXEs.begin() + index);
+		}
+
+		this->Destroy();
+		w->SendSizeEvent();
+	};
 }
 
 EXEScrollWND::EXEScrollWND(wxWindow* parent, wxWindowID id)

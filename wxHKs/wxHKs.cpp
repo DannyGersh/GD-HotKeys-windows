@@ -24,10 +24,12 @@ HK::HK(wxWindow* parent, wxWindowID id, long c, wxString m, wxString k, wxString
 	
 	// init controls
 	{
+		wxTextValidator txtv(wxFILTER_ALPHANUMERIC);
+
 		CheckBox = new wxCheckBox(this, ID_nextHK, "");
 		C = {
 			new wxComboBox(this, ID_nextHK + 2, m, wxDefaultPosition, wxDefaultSize, 0, 0, wxCB_READONLY),
-			new wxComboBox(this, ID_nextHK + 1, k),
+			new wxComboBox(this, ID_nextHK + 1, k, wxDefaultPosition, wxDefaultSize, 0, 0, wxCB_SORT, txtv),
 			new wxComboBox(this, ID_nextHK + 3, e, wxDefaultPosition, wxDefaultSize, 0, 0, wxCB_READONLY),
 			new wxComboBox(this, ID_nextHK + 4, v, wxDefaultPosition, wxDefaultSize, 0, 0, wxCB_READONLY),
 			new wxTextCtrl(this, ID_nextHK + 5, a),
@@ -135,7 +137,7 @@ HK::HK(wxWindow* parent, wxWindowID id, long c, wxString m, wxString k, wxString
 	// set toolTips
 	{
 		wxToolTip* t = new wxToolTip("Enable or disable the hotkey");
-		t->SetDelay(2000);
+		t->SetDelay(1500);
 		CheckBox->SetToolTip(t);
 		t = new wxToolTip("MODS: ctrl, alt, shift, none");
 		t->SetDelay(2000); t->SetReshow(2000);
@@ -240,7 +242,11 @@ void HK::OnKey(wxCommandEvent& event)
 		if (newVal == "") {
 			C.key->ChangeValue(oldVal);
 		}
-		
+
+		else if (newVal.size() > 1 && newVal[0] != 'F')
+		{
+			C.key->ChangeValue(oldVal);
+		}
 		else if (isinKEYs(newVal) == false)
 		{
 			this->key = newVal;
@@ -254,6 +260,7 @@ void HK::OnKey(wxCommandEvent& event)
 			wxMessageBox("key not unique");
 			C.key->ChangeValue(oldVal);
 		}
+		_MainFrame->SetFocus();
 	}
 }
 void HK::OnMod(wxCommandEvent& event)
@@ -266,12 +273,14 @@ void HK::OnMod(wxCommandEvent& event)
 	if (m == mods.none.first) { mod = mods.none.second; }
 	if (m == mods.shift.first) { mod = mods.shift.second; }
 
+	_MainFrame->SetFocus();
 	registerHK();
 }
 void HK::OnExe(wxCommandEvent& event)
 {
 	wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + key);
 	rk.SetValue("exe", C.exe->GetValue());
+	_MainFrame->SetFocus();
 }
 void HK::OnVis(wxCommandEvent& event)
 {
@@ -280,6 +289,8 @@ void HK::OnVis(wxCommandEvent& event)
 
 	if (vis) { vis = false; }
 	else { vis = true; }
+
+	_MainFrame->SetFocus();
 }
 void HK::OnArg(wxCommandEvent& event)
 {
@@ -296,17 +307,25 @@ void HK::OnSearch(wxCommandEvent& event)
 		C.arg->SetValue(openFileDialog.GetPath());
 	}
 
+	_MainFrame->SetFocus();
 }
 void HK::OnDelete(wxCommandEvent& event)
 {
-	wxWindow* w = this->GetParent();
-	wxString oldKEY = key;
-	this->~HK();
+	wxMessageDialog* dialog = new wxMessageDialog(NULL,
+		wxT("Are you sure ?"), wxT(" "),
+		wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION);
 
-	w->SendSizeEvent();
+	if (dialog->ShowModal() == wxID_YES)
+	{
+		wxWindow* w = this->GetParent();
+		wxString oldKEY = key;
+		this->~HK();
 
-	wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + oldKEY);
-	rk.DeleteSelf();
+		w->SendSizeEvent();
+
+		wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + oldKEY);
+		rk.DeleteSelf();
+	}
 }
 void HK::registerHK()
 {
@@ -419,6 +438,7 @@ void MainScrollWND::getHKs() {
 MainFrame::MainFrame()
 	: wxFrame(NULL, wxID_ANY, "wxHotkeys")
 {
+	_MainFrame = this;
 	this->SetIcon(wxICON(IDI_ICON));
 	trayICON = new TrayIcon(this);
 
@@ -518,12 +538,15 @@ void EXEsFrame::OnOK(wxCommandEvent& event)
 				wxMessageBox("Pleas fill all names");
 				proceed = false;
 			}
-
+			if (i->c.name->GetValue() == "EXE name")
+			{
+				wxMessageBox("\"EXE name\" is not allowd.");
+				proceed = false;
+			}
 			if (proceed == false)
 			{
 				break;
 			}
-
 		}
 		
 	}

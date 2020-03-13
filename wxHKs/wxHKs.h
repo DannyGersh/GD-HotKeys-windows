@@ -2,6 +2,9 @@
 #include "ViewEXEs.h"
 #include "trayICON.h"
 
+wxWindow* _MainFrame;
+
+
 class MainApp : public wxApp
 {
 public:
