@@ -88,12 +88,7 @@ public:
 class MainFrame : public wxFrame
 {
 public:
-	wxMenu* menuFile;
-	wxMenu* menuHelp;
-	wxMenuBar* menuBar;
 	TrayIcon* trayICON;
-	
-
 	MainScrollWND* MainScroll;
 	wxBoxSizer* MAINsizer;
 
@@ -119,7 +114,7 @@ private:
 
 enum
 {
-	ID_Hello = 100,
+	ID_wxHKS_quit = 100,
 	ID_newHKbtn = 101,
 	ID_viewEXEs = 102,
 	ID_test = 103,
@@ -129,12 +124,9 @@ enum
 
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 
-EVT_MENU(ID_Hello, MainFrame::OnHello)
-EVT_MENU(wxID_EXIT, MainFrame::OnExit)
-EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
-
 EVT_BUTTON(ID_newHKbtn, MainFrame::newHK)
 EVT_BUTTON(ID_viewEXEs, MainFrame::viewEXEs)
+EVT_BUTTON(ID_wxHKS_quit, MainFrame::OnExit)
 
 EVT_CLOSE(MainFrame::close)
 

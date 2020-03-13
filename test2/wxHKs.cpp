@@ -409,37 +409,12 @@ void MainScrollWND::getHKs() {
 		Kmain.GetNextKey(key_name, why);
 	}
 }
-void MainScrollWND::test(wxKeyEvent& event) {
-	ShellExecuteA(0, "open", "C:\\danny\\poooppp.txt", 0, 0, SW_MAXIMIZE);
-}
 
 MainFrame::MainFrame()
 	: wxFrame(NULL, wxID_ANY, "wx Hotkeys")
 {
 	this->SetIcon(wxICON(IDI_ICON));
 	trayICON = new TrayIcon(this);
-
-	// menu
-	{
-		menuFile = new wxMenu;
-		menuFile->Append(ID_Hello, "&Hello...\tCtrl-H",
-			"Help string shown in status bar for this menu item");
-		menuFile->AppendSeparator();
-		menuFile->Append(wxID_EXIT);
-
-		menuHelp = new wxMenu;
-		menuHelp->Append(wxID_ABOUT);
-
-		menuBar = new wxMenuBar;
-		menuBar->Append(menuFile, "&File");
-		menuBar->Append(menuHelp, "&Help");
-		SetMenuBar(menuBar);
-		CreateStatusBar();
-		SetStatusText("Welcome to wxWidgets!");
-		Bind(wxEVT_MENU, &MainFrame::OnHello, this, ID_Hello);
-		Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
-		Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
-	}
 
 	// main sizer
 	{
@@ -451,12 +426,16 @@ MainFrame::MainFrame()
 		wxBoxSizer* hbox = new wxBoxSizer(wxHORIZONTAL);
 		wxIcon ICOnewHK(wxICON(IDI_ICON_ADD_CROSS));
 		wxIcon ICOviewEXEs(wxICON(IDI_ICON_CONFIGURE));
+		wxIcon ICOquit(wxICON(IDI_ICON_DEL_CROSS));
 		wxButton* newHKbtn = new wxButton(this, ID_newHKbtn, "New hotkey");
 		wxButton* viewEXEs = new wxButton(this, ID_viewEXEs, "View EXEs");
+		wxButton* quit = new wxButton(this, ID_wxHKS_quit, "Quit");
 		newHKbtn->SetBitmap(ICOnewHK);
 		viewEXEs->SetBitmap(ICOviewEXEs);
+		quit->SetBitmap(ICOquit);
 		hbox->Add(newHKbtn, 1, wxALL, 10);
 		hbox->Add(viewEXEs,1, wxALL, 10);
+		hbox->Add(quit, 0, wxALL, 10);
 
 		MAINsizer->Add(hbox, 0, wxEXPAND | wxBOTTOM);
 	}
@@ -489,26 +468,6 @@ MainFrame::~MainFrame()
 {
 	trayICON->~TrayIcon();
 }
-void MainFrame::OnExit(wxCommandEvent& event)
-{
-	this->Destroy();
-}
-void MainFrame::close(wxCloseEvent& event)
-{
-	this->Show(false);
-}
-
-
-void MainFrame::OnAbout(wxCommandEvent& event)
-{
-	wxMessageBox("This is a wxWidgets Hello World example",
-		"About Hello World", wxOK | wxICON_INFORMATION);
-}
-void MainFrame::OnHello(wxCommandEvent& event)
-{
-	wxLogMessage("Hello world from wxWidgets!");
-}
-
 void MainFrame::newHK(wxCommandEvent& event)
 {
 	this->MainScroll->newHK();
@@ -518,9 +477,14 @@ void MainFrame::viewEXEs(wxCommandEvent& event)
 	EXEsFrame * exe = new EXEsFrame(this);
 	exe->Show();
 }
-
-
-
+void MainFrame::OnExit(wxCommandEvent& event)
+{
+	this->Destroy();
+}
+void MainFrame::close(wxCloseEvent& event)
+{
+	this->Show(false);
+}
 
 void EXEsFrame::OnOK(wxCommandEvent& event) 
 {
