@@ -1,14 +1,12 @@
 #include "wx/wxprec.h"
 #include "wxHKs.h"
 
-// todo: enable windows service
 
 bool MainApp::OnInit()
 {
 	thisPATH = argv[0];
 	if (argc > 1) bootARG = argv[1];
 	
-
 	MainFrame *frame = new MainFrame();
 
 	return true;
@@ -16,7 +14,7 @@ bool MainApp::OnInit()
 wxIMPLEMENT_APP(MainApp);
 
 
-HK::HK(wxWindow* parent, wxWindowID id, long c, wxString m, wxString k, wxString e, wxString v, wxString a)
+HK::HK(wxWindow* parent, wxWindowID id, bool c, wxString m, wxString k, wxString e, wxString v, wxString a)
 	: 
 	wxWindow(parent, id)
 {
@@ -86,15 +84,10 @@ HK::HK(wxWindow* parent, wxWindowID id, long c, wxString m, wxString k, wxString
 		}
 		// exe
 		{
-			size_t values; wxString valueNAME; long why{ 1 };
-			wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs"); rk.Open();
-			rk.GetKeyInfo(NULL, NULL, &values, NULL);
-			rk.GetFirstValue(valueNAME, why);
-
-			for (size_t i = 0; i < values; i++)
+			for (auto str : store.main[store.EXEs])
 			{
-				C.exe->Append(valueNAME);
-				rk.GetNextValue(valueNAME, why);
+				string _str = str;
+				C.exe->Append(_str);
 			}
 
 			int index = C.exe->FindString(e);
@@ -181,6 +174,17 @@ HK::HK(wxWindow* parent, wxWindowID id, long c, wxString m, wxString k, wxString
 		}
 	}
 
+	// json
+	{
+		j.CheckBox = c;
+		j.key = k;
+		j.mod = m;
+		j.exe = e;
+		j.vis = v;
+		j.arg = a;
+		j.container[k] = { j.CheckBox, j.mod, j.key, j.exe, j.vis, j.arg };
+	}
+
 	HKs.push_back(this);
 	this->SetSizer(vbox);
 	this->FitInside();
@@ -202,8 +206,6 @@ HK::~HK()
 }
 void HK::OnCheckBox(wxCommandEvent& event)
 {
-	wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + C.key->GetValue());
-
 	if (this->CheckBox->GetValue() == true) {
 
 		int keyCODE = VkKeyScanExA((int)key[0], GetKeyboardLayout(0));
@@ -215,7 +217,9 @@ void HK::OnCheckBox(wxCommandEvent& event)
 		C.vis->Enable(true);
 		C.arg->Enable(true);
 		searchBTN->Enable(true);
-		rk.SetValue("checkbox", 1);
+
+		j.CheckBox = true;
+		saveToDisck();
 	}
 	else {
 
@@ -227,7 +231,9 @@ void HK::OnCheckBox(wxCommandEvent& event)
 		C.vis->Enable(false);
 		C.arg->Enable(false);
 		searchBTN->Enable(false);
-		rk.SetValue("checkbox", 0);
+
+		j.CheckBox = false;
+		saveToDisck();
 
 	}
 }
@@ -235,15 +241,12 @@ void HK::OnKey(wxCommandEvent& event)
 {
 	if (finSetup)
 	{
-		wxString newVal{ C.key->GetValue() };
-		wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + key);
-		wxString oldVal; rk.QueryValue("key", oldVal);
-		wxArrayString Fs = C.key->GetStrings();
+		string newVal{ C.key->GetValue() };
+		string oldVal = j.key;
 
 		if (newVal == "") {
 			C.key->ChangeValue(oldVal);
 		}
-
 		else if (newVal.size() > 1 && newVal[0] != 'F')
 		{
 			C.key->ChangeValue(oldVal);
@@ -251,24 +254,27 @@ void HK::OnKey(wxCommandEvent& event)
 		else if (isinKEYs(newVal) == false)
 		{
 			this->key = newVal;
-			rk.Rename(newVal);
-			rk.SetValue("key", newVal);
+
+			store.main.erase(oldVal);
+			j.key = newVal;
+			saveToDisck();
 
 			registerHK();
 		}
 		else
 		{
 			wxMessageBox("key not unique");
-			C.key->ChangeValue(oldVal);
+			C.key->ChangeValue(oldVal); // todo : bug : key changes to blanck
 		}
+
 		_MainFrame->SetFocus();
 	}
 }
 void HK::OnMod(wxCommandEvent& event)
 {
 	wxString m = C.mod->GetValue();
-	wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + key);
-	rk.SetValue("mod", m);
+	j.mod = m;
+	saveToDisck();
 	if (m == mods.ctrl.first) { mod = mods.ctrl.second;}
 	if (m == mods.alt.first) { mod = mods.alt.second; }
 	if (m == mods.none.first) { mod = mods.none.second; }
@@ -279,24 +285,24 @@ void HK::OnMod(wxCommandEvent& event)
 }
 void HK::OnExe(wxCommandEvent& event)
 {
-	wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + key);
-	rk.SetValue("exe", C.exe->GetValue());
+	j.exe = C.exe->GetValue();
+	saveToDisck();
 	_MainFrame->SetFocus();
 }
 void HK::OnVis(wxCommandEvent& event)
 {
-	wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + key);
-	rk.SetValue("vis", C.vis->GetValue());
-
-	if (vis) { vis = false; }
-	else { vis = true; }
+	string str = C.vis->GetValue();
+	if (str == "True") { vis = true; }
+	if (str == "False") { vis = false; }
+	j.vis = str;
+	saveToDisck();
 
 	_MainFrame->SetFocus();
 }
 void HK::OnArg(wxCommandEvent& event)
 {
-	wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + key);
-	rk.SetValue("arg", C.arg->GetValue());
+	j.arg = C.arg->GetValue();
+	saveToDisck();
 }
 void HK::OnSearch(wxCommandEvent& event)
 {
@@ -318,14 +324,13 @@ void HK::OnDelete(wxCommandEvent& event)
 
 	if (dialog->ShowModal() == wxID_YES)
 	{
+		string oldVal = j.key;
+		store.main.erase(oldVal);
+		ofstream(store.path) << store.main;
+
 		wxWindow* w = this->GetParent();
-		wxString oldKEY = key;
 		this->~HK();
-
 		w->SendSizeEvent();
-
-		wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + oldKEY);
-		rk.DeleteSelf();
 	}
 }
 void HK::registerHK()
@@ -355,16 +360,27 @@ void HK::executeHK(wxKeyEvent& event) {
 	int arg;
 	if (vis == false) { arg = SW_HIDE; }
 	else if (vis == true) { arg = SW_SHOW; }
-	else { wxMessageBox("vis (HK::executeHK) is not true nor false"); }
+	else { wxMessageBox("vis (HK::executeHK()) is not true nor false"); }
 
-	if (C.exe->GetValue() == "Default") 
+	if (C.exe->GetValue() == store.deft.first) 
 	{
 		ShellExecuteA(0, 0, C.arg->GetValue().c_str(), 0, 0, arg);
 	}
 	else 
 	{
-		wxRegKey rg(wxRegKey::HKCU, "Software\\wxHKs\\"); 
-		wxString exePATH; rg.QueryValue(C.exe->GetValue(), exePATH);
+		//wxRegKey rg(wxRegKey::HKCU, "Software\\wxHKs\\"); 
+		//wxString exePATH; rg.QueryValue(C.exe->GetValue(), exePATH);
+		wxString exePATH;
+		json exes = store.main[store.EXEs];
+		for (int i = 0; i < exes.size(); i++)
+		{
+			string str = exes[i][0];
+			if (str == C.exe->GetValue())
+			{
+				string temp = exes[i][1];
+				exePATH = temp;
+			}
+		}
 		ShellExecuteA(0, "open", exePATH.c_str(), C.arg->GetValue().c_str(), 0, arg);
 	}
 }
@@ -377,62 +393,104 @@ void MainScrollWND::newHK() {
 
 	if (isinKEYs("key") == false)
 	{
-		HK* h = new HK(this, wxID_ANY, 1, "CTRL", "key", "Default", "True", "file path");
-		
-		// main
-		{
-			sizer->Add(h, 0, wxEXPAND, 2);
-			this->SetSizer(sizer);
-			this->FitInside();
-			this->SetScrollRate(10, 10);
-		}
+		HK* h = new HK(this, wxID_ANY, true, "CTRL", "key", store.deft.first, "True", "file path");
 
-		// registry
-		{
-			wxRegKey k(wxRegKey::HKCU, "Software\\wxHKs\\key");
-			if (k.Create(false)) {
-				k.SetValue("checkbox", 1);
-				k.SetValue("key", "key");
-				k.SetValue("mod", h->C.mod->GetString(0));
-				k.SetValue("exe", h->C.exe->GetString(0));
-				k.SetValue("vis", h->C.vis->GetString(0));
-				k.SetValue("arg", "file path");
-			}
-		}
+		sizer->Add(h, 0, wxEXPAND, 2);
+		this->SetSizer(sizer);
+		this->FitInside();
+		this->SetScrollRate(10, 10);
+
+		//// registry
+		//{
+		//	wxRegKey k(wxRegKey::HKCU, "Software\\wxHKs\\key");
+		//	if (k.Create(false)) {
+		//		k.SetValue("checkbox", 1);
+		//		k.SetValue("key", "key");
+		//		k.SetValue("mod", h->C.mod->GetString(0));
+		//		k.SetValue("exe", h->C.exe->GetString(0));
+		//		k.SetValue("vis", h->C.vis->GetString(0));
+		//		k.SetValue("arg", "file path");
+		//	}
+		//}
 
 	}
 }
 void MainScrollWND::getHKs() {
 	
-	wxRegKey Kmain(wxRegKey::HKCU, "Software\\wxHKs"); Kmain.Open();
-	size_t subkeys; wxString key_name; long why{ 1 };
-	Kmain.GetKeyInfo(&subkeys, NULL, NULL, NULL);
-	Kmain.GetFirstKey(key_name, why); 
+	for (auto& i : store.main.items()) {
+		string key = i.key();
+		if (key != store.EXEs && key != store.hideOnBoot)
+		{
+			bool checkbox = i.value()[0];
+			string mod = i.value()[1];
+			string key = i.value()[2];
+			string exe = i.value()[3];
+			string vis = i.value()[4];
+			string arg = i.value()[5];
+			
+			if (exe != "EXE name")
+			{
+				HK* h = new HK(this, wxID_ANY, checkbox, mod, key, exe, vis, arg);
+				sizer->Add(h, 0, wxEXPAND, 2);
+				this->SetSizer(sizer);
+				this->FitInside();
+			}
+		}
+	}
 
-	for (size_t i = 0; i < subkeys; i++)
+	//for (auto i : store.main)
 	{
-		long checkbox; wxString mod, key, exe, vis, arg; 
-		
-		// quary values
+		//if (str != store.EXEs && str != store.hideOnBoot)
 		{
-			wxRegKey k0(wxRegKey::HKCU, "Software\\wxHKs\\" + key_name);
-			k0.QueryValue("checkbox", &checkbox);
-			k0.QueryValue("mod", mod);
-			k0.QueryValue("key", key);
-			k0.QueryValue("exe", exe);
-			k0.QueryValue("vis", vis);
-			k0.QueryValue("arg", arg);
+			//bool checkbox = i[1];
+			//string mod = i[2]; 
+			//string key = i[3];
+			//string exe = i[4];
+			//string vis = i[5];
+			//string arg = i[6];
+			//
+			//if (exe != "EXE name")
+			//{
+			//	HK* h = new HK(this, wxID_ANY, checkbox, mod, key, exe, vis, arg);
+			//	sizer->Add(h, 0, wxEXPAND, 2);
+			//	this->SetSizer(sizer);
+			//	this->FitInside();
+			//}
 		}
+	}
 
-		if (exe != "EXE name")
-		{
-			HK* h = new HK(this, wxID_ANY, checkbox, mod, key, exe, vis, arg);
-			sizer->Add(h, 0, wxEXPAND, 2);
-			this->SetSizer(sizer);
-			this->FitInside();
-		}
-
-		Kmain.GetNextKey(key_name, why);
+	// registry
+	{
+		//wxRegKey Kmain(wxRegKey::HKCU, "Software\\wxHKs"); Kmain.Open();
+		//size_t subkeys; wxString key_name; long why{ 1 };
+		//Kmain.GetKeyInfo(&subkeys, NULL, NULL, NULL);
+		//Kmain.GetFirstKey(key_name, why);
+		//
+		//for (size_t i = 0; i < subkeys; i++)
+		//{
+		//	long checkbox; wxString mod, key, exe, vis, arg;
+		//
+		//	// quary values
+		//	{
+		//		wxRegKey k0(wxRegKey::HKCU, "Software\\wxHKs\\" + key_name);
+		//		k0.QueryValue("checkbox", &checkbox);
+		//		k0.QueryValue("mod", mod);
+		//		k0.QueryValue("key", key);
+		//		k0.QueryValue("exe", exe);
+		//		k0.QueryValue("vis", vis);
+		//		k0.QueryValue("arg", arg);
+		//	}
+		//
+		//	if (exe != "EXE name")
+		//	{
+		//		HK* h = new HK(this, wxID_ANY, checkbox, mod, key, exe, vis, arg);
+		//		sizer->Add(h, 0, wxEXPAND, 2);
+		//		this->SetSizer(sizer);
+		//		this->FitInside();
+		//	}
+		//
+		//	Kmain.GetNextKey(key_name, why);
+		//}
 	}
 }
 
@@ -467,18 +525,30 @@ MainFrame::MainFrame()
 		MAINsizer->Add(hbox, 0, wxEXPAND | wxBOTTOM);
 	}
 
-	// registry
+	// json
 	{
-		wxRegKey Kmain(wxRegKey::HKCU, "Software\\wxHKs");
-
-		if (Kmain.Create(false)) // create base registry key
+		ifstream ifile(store.path);
+		if (ifile.peek() == ifstream::traits_type::eof())
 		{
-			Kmain.SetValue("Default", " ");
-			this->MainScroll->newHK();
+			store.main[store.hideOnBoot] = true;
+			store.main[store.EXEs] = { store.deft.first }; // {} initialize as json array
+			ofstream(store.path, ios::out) << store.main;
 		}
-		else {
+		else
+		{
+			ifile >> store.main;
+
+			if (store.main.find(store.hideOnBoot) == store.main.end())
+				store.main[store.hideOnBoot] = true;
+
+			if (store.main.find(store.EXEs) == store.main.end())
+				store.main[store.EXEs] = { store.deft.first }; // {} initialize as json array
+
+			ofstream(store.path) << store.main;
+
 			this->MainScroll->getHKs();
 		}
+		ifile.close();
 	}
 
 	this->SetSize(800, 500);
@@ -517,10 +587,9 @@ void EXEsFrame::OnOK(wxCommandEvent& event)
 {
 	bool proceed{ true };
 	std::forward_list<wxString> testUNIQ;
-
+	
 	// test if all names are valid
-	{
-		for (auto& i : EXEs)
+	for (auto& i : EXEs)
 		{
 			int count{ 0 };
 			for (auto&ii : EXEs){
@@ -533,7 +602,7 @@ void EXEsFrame::OnOK(wxCommandEvent& event)
 					break;
 				}
 			}
-
+	
 			if (i->c.name->GetValue() == "")
 			{
 				wxMessageBox("Pleas fill all names");
@@ -549,48 +618,47 @@ void EXEsFrame::OnOK(wxCommandEvent& event)
 				break;
 			}
 		}
-		
-	}
 	
 	if (proceed) {
-
-		wxRegKey reg(wxRegKey::HKCU, "Software\\wxHKs"); reg.Open();
+	
+		//wxRegKey reg(wxRegKey::HKCU, "Software\\wxHKs"); reg.Open();
 		
 		// delete all values from wxHKs regKey
 		{
-			size_t RGvalues; wxString valueNAME; long why{ 1 };
-
-			reg.GetKeyInfo(NULL, NULL, &RGvalues, NULL);
-			reg.GetFirstValue(valueNAME, why);
-
-			wxArrayString deleteTHIS;
-			for (size_t i = 0; i < RGvalues; ++i) 
-			{
-				deleteTHIS.Add(valueNAME);
-				reg.GetNextValue(valueNAME, why);
-			}
-			for (auto&i : deleteTHIS) 
-			{
-				reg.DeleteValue(i);
-			}
-			for (auto&i : EXEs)
-			{
-				reg.SetValue(i->c.name->GetValue(), i->c.path->GetValue());
-			}
-			reg.SetValue("Default", " ");
-
-			reg.Close();
+			ofstream(store.path, ios::out) << "";
+			//size_t RGvalues; wxString valueNAME; long why{ 1 };
+			//
+			//reg.GetKeyInfo(NULL, NULL, &RGvalues, NULL);
+			//reg.GetFirstValue(valueNAME, why);
+			//
+			//wxArrayString deleteTHIS;
+			//for (size_t i = 0; i < RGvalues; ++i) 
+			//{
+			//	deleteTHIS.Add(valueNAME);
+			//	reg.GetNextValue(valueNAME, why);
+			//}
+			//for (auto&i : deleteTHIS) 
+			//{
+			//	reg.DeleteValue(i);
+			//}
+			//for (auto&i : EXEs)
+			//{
+			//	reg.SetValue(i->c.name->GetValue(), i->c.path->GetValue());
+			//}
+			//reg.SetValue("Default", " ");
+			//
+			//reg.Close();
 		}	
-
+	
 		for (auto&hk : HKs) // uppdate registry subkeys and HKs frame
 		{
-			wxRegKey subREG(wxRegKey::HKCU, "Software\\wxHKs\\" + hk->key);
+			//wxRegKey subREG(wxRegKey::HKCU, "Software\\wxHKs\\" + hk->key);
 			wxComboBox* c = hk->C.exe;
-
+	
 			wxString oldSELECTION = c->GetStringSelection();
 			c->Clear();
-			c->Append("Default");
-
+			c->Append(store.deft.first);
+	
 			for (auto&exe : EXEs)
 			{
 				wxString oldNAME = exe->originalNAME;
@@ -598,30 +666,40 @@ void EXEsFrame::OnOK(wxCommandEvent& event)
 				
 				if (newNAME != "EXE name")
 				{
-					c->Append(newNAME);
+					exe->j.name = newNAME;
+					exe->j.path = exe->c.path->GetValue();
+					exe->saveToDisck();
 				}
 
+				if (newNAME != "EXE name")
+				{
+					c->Append(newNAME);
+				}
+	
 				if (oldNAME == oldSELECTION) // the selected string wase changed
 				{
 					c->SetStringSelection(newNAME);
-
-					wxRegKey subREG(wxRegKey::HKCU, "Software\\wxHKs\\" + hk->key);
-					subREG.SetValue("exe", newNAME);
+	
+					//wxRegKey subREG(wxRegKey::HKCU, "Software\\wxHKs\\" + hk->key);
+					//subREG.SetValue("exe", newNAME);
+					hk->j.exe = newNAME;
+					hk->saveToDisck();
 				}
-
+	
 			}
-
-			if (c->GetValue() == "")
+	
+			if (c->GetValue() == "") // selected value wase deleted
 			{
-				// selected value wase deleted.
 				c->SetSelection(c->FindString("Default"));
-				subREG.SetValue("exe", "Default");
+				//subREG.SetValue("exe", "Default");
+				hk->j.exe = store.deft.first;
+				hk->saveToDisck();
 			}
 		}
 		
 		wxWindow* hkFRAME = HKs[0]->GetParent();
 		hkFRAME->SendSizeEvent();
-
+	
 		this->Close();
 	}
 

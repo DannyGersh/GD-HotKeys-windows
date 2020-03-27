@@ -1,8 +1,18 @@
 #include "wx/wxprec.h"
 #include "ViewEXEs.h"
 
-
+json jmain;
+string jnewEXE = "EXE name";
+string jfilePath = "userDATAexe.json";
 std::vector<EXE*> EXEs;
+
+
+void EXE::saveToDisck()
+{
+	string name = j.name;
+	jmain[name] = j.path;
+	ofstream(jfilePath) << jmain;
+}
 
 EXE::EXE(wxWindow* parent, wxWindowID id, wxString name, wxString path) : wxWindow(parent, id)
 {
@@ -36,8 +46,12 @@ EXE::EXE(wxWindow* parent, wxWindowID id, wxString name, wxString path) : wxWind
 
 	// registry
 	{
-		wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs"); 
-		rk.SetValue(name, path);
+		//wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs"); 
+		//rk.SetValue(name, path);
+		if (name != jnewEXE)
+		{
+			jmain[name] = path;
+		}
 	}
 
 	// bind events
@@ -78,6 +92,7 @@ void EXE::OnDel(wxCommandEvent& event)
 		if (it != EXEs.end()) {
 			int index = std::distance(EXEs.begin(), it);
 			EXEs.erase(EXEs.begin() + index);
+			jmain.erase(c.name->GetValue());
 		}
 
 		this->Destroy();
@@ -90,7 +105,7 @@ EXEScrollWND::EXEScrollWND(wxWindow* parent, wxWindowID id)
 {}
 void EXEScrollWND::newEXE() 
 {
-	EXE* h = new EXE(this, wxID_ANY, "EXE name", "EXE path");
+	EXE* h = new EXE(this, wxID_ANY, jnewEXE, "EXE path");
 
 	sizer->Add(h, 0, wxEXPAND, 2);
 	this->SetSizer(sizer);
@@ -99,34 +114,19 @@ void EXEScrollWND::newEXE()
 }
 void EXEScrollWND::getEXEs() 
 {
-	size_t values; wxString valueNAME; long why{ 1 };
-	wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs"); rk.Open();
-	rk.GetKeyInfo(NULL, NULL, &values, NULL);
-	rk.GetFirstValue(valueNAME, why);
-		 
-	for (size_t i = 0; i < values; i++)
-	{
-		if (valueNAME != "Default" && valueNAME != "Start_on_boot" && valueNAME != "EXE name")
+	for (auto& i : jmain.items()) {
+		string name = i.key();
+		if (name != jnewEXE)
 		{
-			wxString data; rk.QueryValue(valueNAME, data);
-
-			EXE* h = new EXE(this, wxID_ANY, valueNAME, data);
+			string _path = i.value();
+	
+			EXE* h = new EXE(this, wxID_ANY, name, _path);
 			sizer->Add(h, 0, wxEXPAND, 2);
 			this->SetSizer(sizer);
 			this->FitInside();
 			this->SetScrollRate(10, 10);
 		}
-		rk.GetNextValue(valueNAME, why);
 	}
-
-	//if (std::distance(EXEs.begin(), EXEs.end()) == 0)
-	//{
-	//	EXE* h = new EXE(this, wxID_ANY, "EXE name", "EXE path");
-	//	sizer->Add(h, 0, wxEXPAND, 2);
-	//	this->SetSizer(sizer);
-	//	this->FitInside();
-	//	this->SetScrollRate(10, 10);
-	//}
 }
 
 EXEsFrame::EXEsFrame(wxWindow* parent)
@@ -134,6 +134,16 @@ EXEsFrame::EXEsFrame(wxWindow* parent)
 {
 	wxIcon ICOviewEXEs(wxICON(IDI_ICON_CONFIGURE));
 	this->SetIcon(ICOviewEXEs);
+
+	ifstream ifile(jfilePath);
+	if (ifile.peek() == ifstream::traits_type::eof())
+	{
+		ofstream(jfilePath, ios::out) << "{}";
+	}
+	else
+	{
+		ifstream(jfilePath) >> jmain;
+	}
 
 	// add elements
 	{

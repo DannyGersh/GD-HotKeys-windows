@@ -2,7 +2,6 @@
 #include "trayICON.h"
 
 
-
 TrayIcon::TrayIcon(wxFrame* _mainFrame)
 {
 	mainFrame = _mainFrame;
@@ -11,6 +10,12 @@ TrayIcon::TrayIcon(wxFrame* _mainFrame)
 	wxRegKey reg(wxRegKey::HKCU, "Software\\Microsoft\\Windows\\CurrentVersion\\Run");
 	if (reg.HasValue("wxHKs")) { check = true; }
 	else{ check = false; }
+
+	if (jmain.find(hideOnBoot) == jmain.end())
+	{
+		jmain[hideOnBoot] = true;
+	}
+	check = jmain[hideOnBoot];
 }
 TrayIcon::~TrayIcon()
 {
@@ -31,13 +36,14 @@ void TrayIcon::OnStartOnBoot(wxCommandEvent&)
 			"softwer will pop up when your computer starts."
 		);
 
-		wxRegKey reg(wxRegKey::HKCU, "Software\\Microsoft\\Windows\\CurrentVersion\\Run");
+		wxRegKey reg(wxRegKey::HKCU, "c");
 		if (reg.Exists() == false)
 			wxMessageBox("canot start on startup");
-		else
+		else 
 			if (reg.HasValue("wxHKs"))
 				reg.DeleteValue("wxHKs");
 
+		saveToDisck(false);
 	}
 	else
 	{
@@ -51,6 +57,8 @@ void TrayIcon::OnStartOnBoot(wxCommandEvent&)
 			wxMessageBox("canot start on startup");
 		else
 			reg.SetValue("wxHKs", "\"" + thisPATH + "\" /MINIMIZED");
+
+		saveToDisck(true);
 	}
 	check = !check;
 }

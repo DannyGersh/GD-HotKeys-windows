@@ -10,6 +10,12 @@ public:
 		wxButton* search;
 		wxButton* del;
 	} c;
+	struct J {
+		json name;
+		json path;
+	} j;
+	void saveToDisck();
+	
 
 public:
 	/*

@@ -16,13 +16,24 @@ int  ID_next_hotkey{ 500 };
 bool finSetup{ false };
 wxString thisPATH, bootARG;
 struct MODS {
-	std::pair<wxString, int> ctrl{ "CTRL", wxMOD_CONTROL };
-	std::pair<wxString, int> alt{ "ALT", wxMOD_ALT };
-	std::pair<wxString, int> shift{ "SHIFT", wxMOD_SHIFT };
-	std::pair<wxString, int> none{ "NONE", 0 };
+	pair<wxString, int> ctrl{ "CTRL", wxMOD_CONTROL };
+	pair<wxString, int> alt{ "ALT", wxMOD_ALT };
+	pair<wxString, int> shift{ "SHIFT", wxMOD_SHIFT };
+	pair<wxString, int> none{ "NONE", 0 };
 } mods;
 
-
+struct Storage {
+	json main;
+	string path = "userDATA.json";
+	string hideOnBoot = "_wxHKS hideOnBoot";
+	string EXEs = "_wxHKs EXEs";
+	pair < string, string> deft{ "Default", "Default" };
+	pair<string, string> task_manager{ "Task manager", "C:\\Windows\\System32\\Taskmgr.exe" };
+	pair<string, string> notepad{ "Notepad", "C:\\Windows\\System32\\notepad.exe" };
+	pair<string, string> paint{ "Paint", "C:\\Windows\\System32\\mspaint.exe" };
+} store;
+string hideOnBoot{ "_wxHKS hideOnBoot" };
+string jsonPath = "userDATA.json";
 
 class HK : public wxWindow
 {
@@ -37,6 +48,19 @@ public:
 	} C;
 	wxButton* searchBTN;
 	wxButton* deleteBTN;
+    
+	struct J{
+		json container;
+		json CheckBox;
+		json mod;
+		json key;
+		json exe;
+		json vis;
+		json arg;
+		json searchBTN;
+		json deleteBTN;
+	} j;
+
 public:
 	wxBoxSizer* vbox;
 	wxString key;
@@ -44,7 +68,7 @@ public:
 	int mod;
 	int ID;
 public:
-	HK(wxWindow* parent, wxWindowID id, long c, wxString m, wxString k, wxString e, wxString v, wxString a);
+	HK(wxWindow* parent, wxWindowID id, bool c, wxString m, wxString k, wxString e, wxString v, wxString a);
 	~HK();
 	void OnCheckBox(wxCommandEvent& event);
 	void OnKey(wxCommandEvent& event);
@@ -56,6 +80,12 @@ public:
 	void OnDelete(wxCommandEvent& event);
 	void registerHK();
 	void executeHK(wxKeyEvent& event);
+	void saveToDisck()
+	{
+		j.container = { j.CheckBox, j.mod, j.key, j.exe, j.vis, j.arg };
+		store.main[key] = j.container;
+		ofstream(store.path) << store.main;
+	}
 
 };
 
