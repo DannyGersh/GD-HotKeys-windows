@@ -288,7 +288,18 @@ void HK::OnVis(wxCommandEvent& event)
 	wxRegKey rk(wxRegKey::HKCU, "Software\\wxHKs\\" + key);
 	rk.SetValue("vis", C.vis->GetValue());
 
-	if (vis) { vis = false; }
+	if (vis) 
+	{ 
+		std::string message =
+		"This feature is for advanced users.\n"
+		"The file  specified would be executed in Background, meaning it would not be visible to the user, make sure it closes.\n"
+		"note that the file being executed will close as you log off windows.\n"
+		"change to true if unsure.";
+		
+		wxMessageBox(message);
+
+		vis = false; 
+	}
 	else { vis = true; }
 
 	_MainFrame->SetFocus();
@@ -401,6 +412,10 @@ void MainScrollWND::newHK() {
 		}
 
 	}
+	else
+	{
+		wxMessageBox("Key already exists.");
+	}
 }
 void MainScrollWND::getHKs() {
 	
@@ -437,7 +452,7 @@ void MainScrollWND::getHKs() {
 }
 
 MainFrame::MainFrame()
-	: wxFrame(NULL, wxID_ANY, "wxHotkeys")
+	: wxFrame(NULL, wxID_ANY, "GD-HotKeys-Windows")
 {
 	_MainFrame = this;
 	this->SetIcon(wxICON(IDI_ICON));
