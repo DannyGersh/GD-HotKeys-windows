@@ -2,7 +2,7 @@
 A central place to store and modify key shortcuts for windows.
 - straightforward interface
 - simple system tray interface
-- determine which app executes the specified file (optional)
+- determine which app executes the specified file
 - execute files in the background (optional)
 - start on boot in the background (optional)
 
